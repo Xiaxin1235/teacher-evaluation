@@ -1,128 +1,228 @@
-# 教师评估 AI 平台（模块化项目仓库）
+# 智能教育数字化与教师评估 Agent 平台 (TeacherEval)
 
-> 定位：类似 "pi agent" 的多模型 Agent 平台，接入各类模型 API，对本地教师数据库做检索与分析，完成教学水平等指标的**量化、可追溯、有置信度**的评估。核心命题：**用户提问可以笼统宽泛，但系统必须通过证据链给出严谨结论**。
-> **当前状态**：P0 归档完成（文档 + 指标引擎原型），进入模块化分步建设阶段。
-
----
-
-## 一、如何用这套仓库分步干活（先读这个）
-
-本仓库为 **"任意 agent 分步完成整个项目"** 设计。规则三件套：
-
-1. **看板**：`python scripts/module_board.py` —— 实时告诉你"哪些模块 done、哪些 ready、下一步做哪个"。
-2. **模块登记表**：`modules/registry.json` —— 机器可读：模块 id、状态、依赖、产出清单、验收命令，是协作的"指挥中心"。
-3. **模块 SPEC**：`modules/<id>/SPEC.md` —— 每个模块一份**自包含构建说明书**（任务清单 + 验收命令 + 边界）。agent 只读自己那一份就能开工，做完跑通验收再在 registration 标记 done。
-
-**工作纪律**（registry.json 的 `work_rule`）：
-- 一个 agent 一次只认领一个 module id，交付 `produces` 清单、跑通 `verify` 才标记 done（防假状态）；
-- 任何超出 SPEC 的假设必须先写回 SPEC 再执行；
-- 先跑 `python scripts/doc_smoke.py` 守护仓库健康，再跑模块验收。
-
-### 模块依赖图
-
-```
-M00 工作区/文档（done）
- ├─ M01 数据契约（done）→ M02 指标引擎（done）→ M03 冒烟基线（done）
- ├─ M06 模型网关（todo）
- M02 ── M04 评分校准（todo）   ← 下一步 ①
- M02 ── M05 复核/申诉 DDL（todo） ← 下一步 ①（可与 M04 并行）
- M02+M06 ─ M07 Agent 编排（blocked）
- M02+M07 ─ M08 证据合成器（blocked）
- M02+M07+M08 ─ M09 REST API（blocked）
- M09 ─ M10 Web 看板（blocked）／ M11 权限审计（blocked）
- M07+M08 ─ M12 Golden Set 回归（blocked）
-```
+> **定位**：面向教育行政主管部门、督导评估机构及学校管理者的**智能多意图对话评估与分析平台**。
+> 平台结合**百万级真实作答数据库**、**可追溯确定性规则引擎**、**自主 Python 绘图工具链（Agent Code Interpreter）** 与 **多大模型智能解读网关**，实现：**提问自由开放、事实精确可溯、图表动态生成、诊断深度智能**。
 
 ---
 
-## 二、看板操作速查
-
-```bash
-python scripts/module_board.py                    # 看板 + 下一步建议
-python scripts/doc_smoke.py                       # 全仓库健康冒烟（每个 agent 收尾都跑）
-python scripts/data_contract_validator.py --contract contracts/data_contract_v0.1.json --dir data/demo   # 数据体检
-```
-
-### 完成一个模块后的"交接动作"
-
-1. 跑 `python scripts/doc_smoke.py`（含"done 模块产物必须存在"检查）；
-2. 在 `modules/registry.json` 把该 `id` 的 `status` 改为 `"done"`；
-3. 跑 `python scripts/module_board.py` 确认依赖链正确解锁下一个模块；
-4. 若模块产出扩大契约/模板，同步更新 README 资产表。
+## 目录
+- [一、核心特色与设计原则](#一核心特色与设计原则)
+- [二、核心功能矩阵](#二核心功能矩阵)
+- [三、系统架构与数据流转](#三系统架构与数据流转)
+- [四、快速上手与使用指南](#四快速上手与使用指南)
+  - [方式 1：独立可执行版（免安装，双击即用）](#方式-1独立可执行版免安装双击即用推荐)
+  - [方式 2：Python 源码开发运行](#方式-2python-源码开发运行)
+  - [方式 3：命令行 CLI 模式](#方式-3命令行-cli-模式)
+- [五、典型对话提问范例](#五典型对话提问范例)
+- [六、代码库与模块布局](#六代码库与模块布局)
+- [七、数据安全与考核合规底线](#七数据安全与考核合规底线)
 
 ---
 
-## 三、当前资产
+## 一、核心特色与设计原则
 
-| 资产 | 位置 | 说明 |
+```
+用户自由提问 ────────► 意图路由器 (Router)
+                             │
+       ┌─────────────────────┼─────────────────────┐
+       ▼                     ▼                     ▼
+① 微观设备事实       ② 区域宏观大盘       ③ 学校排位对比 / 教师评估
+       │                     │                     │
+       └─────────────────────┼─────────────────────┘
+                             ▼
+             底层真实数据库 (SQLite 150万+作答数据)
+                             │
+                             ▼
+            Agent 编排器 (Tool Orchestrator)
+                             │
+        ┌────────────────────┴────────────────────┐
+        ▼                                         ▼
+   Python 绘图解释器                       大模型诊断网关
+ (Matplotlib 动态高清图表)               (政策建议 / 容错自愈)
+        │                                         │
+        └────────────────────┬────────────────────┘
+                             ▼
+                极简现代化 Web 交互台
+```
+
+1. **确定性数字 vs 生成式语言解耦（数字绝不幻觉）**：
+   * 所有学校得分、指标数值、排名位次、梯队分布与图表数据，**100% 由本地 SQLite 真实数据库计算生成**；
+   * 大模型仅基于经过严格校验的事实证据提供宏观政策建议与研判说明，**严禁大模型捏造篡改任何数字**。
+2. **现代 Agent 工具调用架构（In-Process Code Interpreter）**：
+   * 采用类似 Advanced Data Analysis 模式，Agent 根据查询场景自主生成专业 Python 绘图脚本并执行；
+   * 采用**进程内安全沙箱**，不依赖宿主机系统命令，打包移植到任何未安装 Python 的陌生电脑依然 100% 正常绘图；
+   * 前端直接内嵌超清矢量图表（支持放大与下载），并提供**可折叠的 Python 代码透视抽屉**，直观展示 Agent 绘图源码与运行耗时。
+3. **智能多轮对话与代词消解**：
+   * 具备上下文实体记忆槽位，支持自然语言多轮追问与指代消解（如第一轮问某校设备，第二轮追问“那它在区里排第几名？”、“它的数字化水平呢？”，系统自动继承目标学校与评测年份）。
+4. **大模型网关韧性与自愈机制**：
+   * 兼容 OpenAI、DeepSeek、通义千问、Kimi、Grok 等多种主流协议；
+   * 针对外部中转站偶发的 `502/503/504`、`Upstream service temporarily unavailable`，底层具备 3 次阶梯式退避自动重试；
+   * 前端设计了优雅降级提示卡片与**「重新解读 ↻」**按钮，网络中断时核心数据图表毫发无损，恢复后可一键无刷新重新唤起大模型。
+
+---
+
+## 二、核心功能矩阵
+
+| 功能板块 | 支持场景与提问方式 | 底层支撑能力 |
 |---|---|---|
-| 项目大纲 | `docs/教师评估AI平台-项目大纲.md` | 愿景、六大子系统、路线图 P0~P4、风险、待决策项 |
-| 需求确认单 | `docs/需求确认单.md` | 决策记录：**评估用途=考核性（已确认）**；其余待签字 |
-| 系统设计 v0.1 | `docs/系统设计文档-v0.1.md` | 数据模型、指标体系、引擎时序、**§0 考核性基线 R1~R4**、API 草案 |
-| 模块登记表 | `modules/registry.json` | 13 个模块：状态/依赖/产出/验收（机器可读） |
-| 模块 SPEC | `modules/M00~M12/SPEC.md` | 每个模块自包含构建说明书 |
-| 数据契约 | `contracts/data_contract_v0.1.json` | 9 张表最小字段集 + 跨表规则（发给数据方对接） |
-| 数据校验器 | `scripts/data_contract_validator.py` | 数据交付一键体检，FAIL 阻塞管线 |
-| 模拟数据 | `scripts/mock_transform.py` + `data/demo/` | 9 张虚构脱敏表 |
-| 指标引擎 | `scripts/indicator_engine.py` + `evaluation_templates/2025-2026_v1.yaml` | 无模型评估管线：得分/置信度/证据块/报告 |
-| 评分校准（M04） | `packages/indicator_engine/calibration.py` + `tests/test_calibration.py` | 考核性 R1：百分位排名 + z-score + 小样本回退（测试 6/6） |
-| 复核/申诉 DDL（M05） | `data/ddl/05_review_appeal.sql` | 考核性 R2/R3：`human_review_checklist` + `appeal_record`（含 trace_json 结构） |
-| 模型网关（M06） | `packages/llm_gateway/gateway.py` + `providers.json` | 多供应商路由/降级/双模型交叉校验；密钥只走环境变量 |
-| Agent 编排（M07） | `packages/agent/planner.py` + `retriever.py` + `critic.py` + `bench.py` | 宽泛问题→子任务 DAG / 证据强制引用 / 规则批判（C1~C4）|
-| 证据合成器（M08） | `packages/agent/composer.py` | 人类可读报告：内联证据、缺口披露、红线提示、弱项/趋势提示、免责声明 |
-| REST API（M09） | `apps/api/main.py` + `requirements.txt` | `/api/v1/chat` 等 6 端点；fastapi 未装可降级（核心逻辑仍可用） |
-| Web 对话台（M10） | `apps/web/index.html` | 零构建单页：对话评估 + 雷达图 + 看板趋势；无后端 mock 可演示 |
-| 权限与审计（M11） | `packages/core/authz.py` + `data/ddl/11_auth_audit.sql` | 角色权限矩阵 + 红线最严访问 + 审计/访问日志 |
-| Golden Set（M12） | `tests/golden/golden_set.json` + `run_eval.py` | 20 条回归用例；`--smoke` 纯规则跑（当前 18/18 非集成通过） |
+| **① 微观设备事实核查** | *“七台河市新兴区罗泉学校给老师配置了多少台平板电脑？”*<br>*“武汉市蔡甸区横龙小学有几间计算机网络教室？”* | 跨年份题库映射、师生配置比测算、历年跨学年增长折线图 + 配置横向对比图 |
+| **② 区域数字化宏观大盘** | *“湖北省 2021 数字化大盘怎么样？”*<br>*“武汉市的数字化水平怎么样？”* | 省/市/区县三级自适应聚合、六大维度综合得分、优良中差梯队分布、Top 5 标杆示范校与 Bottom 5 帮扶校名单、双联全景透视图 |
+| **③ 区域相对排位与对比** | *“新兴区罗泉学校在区里排第几名？”*<br>*“某某学校在全省处于什么位置？”* | 区域全量学校百分位排位、超越全区比例、分维度领先/落后差值分析、高亮梯队阶梯条形图 |
+| **④ 整校数字化深度评估** | *“罗泉学校数字化水平怎么样？”*<br>*“某学校六个维度表现如何？”* | 覆盖“数字资源、教育教学、数字素养、基础设施、教育治理、保障机制”六大维度多轴雷达图 |
+| **⑤ 教师多维教学与人事评估** | *“评估张老师 2024-2025 学年的教学水平”*<br>*支持在简介查询页按教师直接检索* | 教学设计、课堂听课、及格率增值、科研积分、学生评教等全中文证据链；**师德师风红线一票否决**（触发红线总分归零转独立人事流程） |
+| **⑥ 个人与系统安全配置** | *多套模型 Profile 一键切换*<br>*本地无感保存* | 密钥存放在本机的 `%APPDATA%\TeacherEval\llm_config.json`，重新打包或移动程序绝不丢失配置 |
 
-## 四、快速运行（原型）
+---
+
+## 三、系统架构与数据流转
+
+### 1. 业务数据层
+- **核心数据库**：[`data/real/education_digitization.sqlite`](file:///d:/teacher%20evaluation/data/real/education_digitization.sqlite)（涵盖全国 37 万+所学校次、150 万+作答事实记录、标准化题库映射表）；
+- **教师评估规范**：[`evaluation_templates/2025-2026_v1.yaml`](file:///d:/teacher%20evaluation/evaluation_templates/2025-2026_v1.yaml) 与模拟教师档案库。
+
+### 2. 智能调度与工具层
+- **意图路由与代词继承**：[`packages/agent/router.py`](file:///d:/teacher%20evaluation/packages/agent/router.py)
+- **Agent 工具调用体系**：
+  - 工具定义基类：[`packages/agent/tools/base.py`](file:///d:/teacher%20evaluation/packages/agent/tools/base.py)
+  - 动态绘图脚本生成器：[`packages/agent/tools/chart_builder.py`](file:///d:/teacher%20evaluation/packages/agent/tools/chart_builder.py)
+  - 进程内 Python 隔离执行器：[`packages/agent/tools/python_runner.py`](file:///d:/teacher%20evaluation/packages/agent/tools/python_runner.py)
+  - 工具注册与编排中枢：[`packages/agent/tools/orchestrator.py`](file:///d:/teacher%20evaluation/packages/agent/tools/orchestrator.py)
+- **多模型网关与重试器**：[`packages/llm_gateway/gateway.py`](file:///d:/teacher%20evaluation/packages/llm_gateway/gateway.py)
+
+### 3. 用户交互层
+- **Web 对话前端**：[`apps/web/index.html`](file:///d:/teacher%20evaluation/apps/web/index.html)（收敛为“对话台”、“简介查询”、“模型密钥” 3 大页面，初次登入不自动发起查询以节省用户 API 额度）；
+- **后端服务**：[`apps/api/main.py`](file:///d:/teacher%20evaluation/apps/api/main.py)（基于 FastAPI，支持 REST API 与图表静态资源托管）。
+
+---
+
+## 四、快速上手与使用指南
+
+### 方式 1：独立可执行版（免安装，双击即用，推荐）
+适合直接分发或在无 Python 环境的 Windows 电脑上运行：
+
+1. 打开目录 [`dist/TeacherEval/`](file:///d:/teacher%20evaluation/dist/TeacherEval/)；
+2. 双击运行 **`TeacherEval.exe`**；
+3. 系统将自动启动本地服务并调起默认浏览器访问 `http://127.0.0.1:8600`。
+
+> **移植说明**：如果需要复制到其他电脑，只需将整个 `dist/TeacherEval` 文件夹复制过去即可。内嵌完整的 Python 3.12 虚拟环境、SQLite 数据库及所有依赖，**目标机完全不需要安装 Python**。
+
+### 方式 2：Python 源码开发运行
+适合开发者进行二次开发或调试：
 
 ```bash
-python scripts/mock_transform.py                     # 生成模拟数据
-python scripts/indicator_engine.py --teacher T001 --json-out   # 综合 83.13 / 覆盖率 1.0
-python scripts/indicator_engine.py --teacher T003 --json-out   # 红线触发 / 覆盖率 0.65
+# 1. 确保安装基础依赖
+pip install -r apps/api/requirements.txt
+
+# 2. 启动服务（自动打开浏览器）
+python run_app.py
+
+# 或仅以后台方式启动服务：
+python run_app.py serve --port 8600 --no-browser
 ```
 
-输出要点：综合得分（0~100，权重加权）／数据覆盖率（<0.6 明示"仅供参考"）／综合置信度（小样本、断档下调）／红线标记（一票否决，转人事）／证据引用列表（来源+周期+口径）。
-
-## 四·五、exe 版（无需 Python，双击即用）
-
-**产物**：`dist/TeacherEval/`（TeacherEval.exe + `_internal` 运行库，整个文件夹分发）
+### 方式 3：命令行 CLI 模式
+支持在终端直接进行评估计算与报告导出：
 
 ```bash
-TeacherEval.exe                            # 双击：起本地 API + 自动打开对话台 http://127.0.0.1:8600
-TeacherEval.exe serve                      # 只起服务
-TeacherEval.exe eval --teacher T001        # 命令行评估，输出报告
-TeacherEval.exe eval --teacher T003 --json-out   # 评估 + JSON 落到 exe 旁 output/
+# 教师教学水平评估导出
+python run_app.py eval --teacher T001
+python run_app.py eval --teacher T003 --json-out
+
+# 指定学校评估
+python run_app.py eval --school "七台河市新兴区罗泉学校" --year 2021
 ```
 
-- 对话台/看板/API 全部内嵌（演示数据 + 评估模板 + Web 页面），无需任何外部文件或 Python 环境。
-- 重新构建：`python build_exe.py`（细节与 onedir 决策见 `modules/M13-packaging/SPEC.md`）。
+---
 
-## 五、原型已验证的关键机制
+## 五、典型对话提问范例
 
-1. **量纲统一**：教案覆盖率、评教（1~5×20）、成绩增值（基线差分）统一到 0~100 量表。
-2. **增值口径 + 剔除自包含**：及格率改善 = 本班及格率 − 同年级同科目基线（剔除被评教师自己）。
-3. **红线一票否决**：查实师德记录不进加权，单独标记转人事流程。
-4. **不确定显式披露**：无数据维度 → 空缺 + 缺口说明 + 置信度下调，不编造数字。
-5. **证据可追溯**：报告附证据块（来源表、时间范围、口径公式）。
+在系统前端的提问框中，您可以直接输入以下类型的自然语言问题：
 
-## 六、项目状态
+### 1. 微观设备事实与办学规模
+* `七台河市新兴区罗泉学校给老师配置了多少台平板电脑？`
+* `横龙小学有多少台学生平板？`
+* `罗泉学校有几台台式计算机？`
 
-**M00–M13 已全部完成**（看板 `python scripts/module_board.py`，无待办模块）：
+### 2. 区域数字化宏观大盘透视
+* `湖北省 2021 数字化大盘怎么样？`
+* `武汉市数字化水平怎么样？`
+* `七台河市新兴区数字化水平如何？`
 
-| 阶段 | 模块 | 状态 |
-|---|---|---|
-| 文档与契约 | M00 工作区 / M01 数据契约 / M03 冒烟基线 | done |
-| 评估核心 | M02 指标引擎（无 LLM 数学底座） | done |
-| 考核性保障 | M04 评分校准 R1 / M05 复核申诉 R2/R3 | done |
-| AI 编排 | M06 模型网关 / M07 Agent（Planner/Retriever/Critic）/ M08 报告合成 | done |
-| 应用层 | M09 REST API / M10 Web 对话台 / M11 权限审计 | done |
-| 质量与交付 | M12 Golden Set 回归（18/18 通过）/ M13 exe 打包 | done |
+### 3. 区域相对排位与差距分析
+* `七台河市新兴区罗泉学校在区里排第几名？`
+* `黄梅县第一小学在全省排在什么位置？`
 
-**进入真实使用前还需**（需业务方参与）：
-1. 用 `需求确认单.md` 签订其余决策（数据来源、权重口径、角色）；
-2. 用 `contracts/data_contract_v0.1.json` + 校验器接入真实数据（当前全为虚构演示数据）；
-3. 配置模型 key（环境变量，见 M06）启用对话式 LLM 解读；生产化（PostgreSQL、审计落库）。
+### 4. 连续多轮代词追问示例
+```text
+用户：七台河市新兴区罗泉学校给老师配置了多少台平板电脑？
+系统：[给出 14 台数据，并自动绘制历年配置趋势图与设备规模对比图]
 
-> 说明：本仓库所有 CSV/JSON 为**虚构脱敏数据**，仅演示评估管线，不含任何真实教师或学生信息。模型密钥只允许来自环境变量（见 M06 契约），禁止写入仓库。
+用户：那学生平板呢？
+系统：[自动继承罗泉学校实体，回答配置 18 台，并刷新图表]
+
+用户：它在区里排第几名？
+系统：[自动识别“它”代表罗泉学校，输出在全区 10 所学校中排第 2 名，绘制排位阶梯图]
+
+用户：它的数字化水平怎么样？
+系统：[深入进行整校六维综合评估，输出多维能力雷达图]
+```
+
+---
+
+## 六、代码库与模块布局
+
+```text
+teacher-evaluation/
+├── apps/
+│   ├── api/
+│   │   ├── main.py              # FastAPI 核心服务接口（Chat、评估、图表下载）
+│   │   └── requirements.txt     # 核心 Python 依赖
+│   └── web/
+│       └── index.html           # 现代化零构建响应式前端（对话台/简介查询/模型密钥）
+├── data/
+│   ├── demo/                    # 教师评估模拟脱敏数据
+│   └── real/
+│       └── education_digitization.sqlite  # 百万级真实学校数字化作答数据库
+├── evaluation_templates/        # 评估维度配置（YAML 格式，定义权重与指标规则）
+├── packages/
+│   ├── agent/
+│   │   ├── router.py            # 开放式多意图路由器与多轮代词消解中枢
+│   │   ├── composer.py          # 证据合成器（格式化生成 Markdown 报告与事实卡片）
+│   │   ├── critic.py            # 规则与合规性审查器
+│   │   └── tools/               # 模块化 Agent 工具调用体系
+│   │       ├── base.py          # 工具抽象基类与 ToolResult 规范
+│   │       ├── chart_builder.py # 动态 Python 绘图代码生成专家
+│   │       ├── python_runner.py # 进程内隔离 Python 解释器沙箱
+│   │       ├── orchestrator.py  # 工具调用调度器
+│   │       └── registry.py      # 工具注册表
+│   ├── core/
+│   │   ├── authz.py             # 角色权限与红线安全访问控制
+│   │   └── frozen_paths.py      # PyInstaller 打包环境路径自适应解析
+│   ├── indicator_engine/        # 评分校准、百分位与 z-score 统计校准
+│   └── llm_gateway/
+│       ├── gateway.py           # 多大模型统一网关（Bearer 鉴权、自动重试、密钥持久化）
+│       └── providers.json       # 预设模型提供商配置
+├── scripts/
+│   ├── fact_engine.py           # 微观指标事实提取引擎
+│   ├── region_engine.py         # 区域大盘统计与学校相对排位计算引擎
+│   ├── school_engine.py         # 学校六维评估计算引擎
+│   ├── indicator_engine.py      # 教师教学评估核心计算底座
+│   ├── test_tools.py            # Agent 工具链自动化测试
+│   └── test_multiturn.py        # 多轮对话与实体继承自动化测试
+├── build_exe.py                 # PyInstaller 一键编译打包脚本
+├── TeacherEval.spec             # 编译规范配置文件
+└── README.md                    # 本文档
+```
+
+---
+
+## 七、数据安全与考核合规底线
+
+1. **真实数据真实呈现**：
+   * 本系统严格遵守**“数据不编造、来源可查验、计算可追溯”**原则。
+   * 所有报告均明确注明数据来源、统计年份、有效样本数与置信度。
+2. **师德师风一票否决（红线机制）**：
+   * 教师评估模块若触发师德师风红线（查实违法违纪或重大信访违规），系统将直接触发红线拦截，**总分不参与加权，强制转交人事纪检部门独立处理**。
+3. **API 密钥本地化隔离**：
+   * 用户在大模型设置界面填写的 API Key 仅保存在本机操作系统的用户个人应用数据目录（Windows: `%APPDATA%\TeacherEval\llm_config.json`）；
+   * 密钥不上传、不入代码库，重新打包或分发程序时绝不会泄露任何个人凭证。
