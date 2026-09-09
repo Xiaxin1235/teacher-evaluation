@@ -1,0 +1,11 @@
+teacher_id,school_year,level,count
+T001,2024-2025,school,2
+T001,2023-2024,municipal,1
+T001,2025-2026,provincial,1
+T002,2023-2024,school,2
+T002,2023-2024,municipal,1
+T003,2025-2026,school,2
+T003,2023-2024,municipal,1
+T004,2023-2024,school,2
+T004,2023-2024,municipal,1
+T004,2025-2026,provincial,1
