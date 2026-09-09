@@ -1,0 +1,5 @@
+teacher_id,name_hash,dept_id,title,hire_year,is_active
+T001,h-T001,数学组,高级,2010,1
+T002,h-T002,数学组,中级,2016,1
+T003,h-T003,语文组,初级,2021,1
+T004,h-T004,英语组,高级,2005,1
