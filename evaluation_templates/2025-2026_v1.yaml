@@ -1,0 +1,52 @@
+# 示例评估模板（v1）——权重与口径均为"示例"，须由业务方确认后生效。
+# 该文件被 scripts/indicator_engine.py 读取，对应《系统设计文档》§3。
+
+template:
+  name: "2025-2026学年 教学评估 v1（示例）"
+  school_year: "2025-2026"
+  version: 1
+  weight_total: 1.0
+
+dimensions:
+  - key: teaching_design
+    name: 教学设计
+    weight: 0.20
+    metrics:
+      - key: lesson_plan_coverage
+        weight: 1.0
+
+  - key: classroom
+    name: 课堂教学
+    weight: 0.25
+    metrics:
+      - key: observation_score
+        weight: 1.0
+
+  - key: teaching_effect
+    name: 教学效果
+    weight: 0.35
+    metrics:
+      - key: pass_rate_improvement
+        weight: 1.0
+
+  - key: research_activity
+    name: 教研与学术
+    weight: 0.10
+    metrics:
+      - key: research_score
+        weight: 1.0
+
+  - key: student_feedback
+    name: 学生评教
+    weight: 0.10
+    metrics:
+      - key: survey_avg
+        weight: 1.0
+
+  - key: ethics_redline
+    name: 师德师风（红线）
+    weight: 0
+    is_redline: true
+    metrics:
+      - key: redline_check
+        weight: 1.0
