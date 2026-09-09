@@ -1,0 +1,214 @@
+{
+  "project": "教师评估 AI 平台",
+  "registry_version": "1.0",
+  "board_script": "scripts/module_board.py",
+  "modules": [
+    {
+      "id": "M00",
+      "name": "工作区与文档归档",
+      "status": "done",
+      "spec": "modules/M00-workspace/SPEC.md",
+      "depends": [],
+      "produces": [
+        "docs/教师评估AI平台-项目大纲.md",
+        "docs/需求确认单.md",
+        "docs/系统设计文档-v0.1.md",
+        "README.md"
+      ],
+      "verify": [
+        "docs 目录存在且包含三份主文档",
+        "README.md 存在"
+      ]
+    },
+    {
+      "id": "M01",
+      "name": "数据契约与校验器",
+      "status": "done",
+      "spec": "modules/M01-data-contract/SPEC.md",
+      "depends": ["M00"],
+      "produces": [
+        "contracts/data_contract_v0.1.json",
+        "scripts/data_contract_validator.py"
+      ],
+      "verify": [
+        "python scripts/data_contract_validator.py --dir data/demo --contract contracts/data_contract_v0.1.json 全表 PASS"
+      ]
+    },
+    {
+      "id": "M02",
+      "name": "指标计算引擎",
+      "status": "done",
+      "spec": "modules/M02-indicator-engine/SPEC.md",
+      "depends": ["M01"],
+      "produces": [
+        "evaluation_templates/2025-2026_v1.yaml",
+        "scripts/indicator_engine.py",
+        "scripts/mock_transform.py"
+      ],
+      "verify": [
+        "python scripts/mock_transform.py 生成 9 张模拟表",
+        "python scripts/indicator_engine.py --teacher T001 --json-out 生成 report_T001.json"
+      ]
+    },
+    {
+      "id": "M03",
+      "name": "文档冒烟与回归基线",
+      "status": "done",
+      "spec": "modules/M03-doc-smoke/SPEC.md",
+      "depends": ["M02"],
+      "produces": [
+        "scripts/doc_smoke.py"
+      ],
+      "verify": [
+        "python scripts/doc_smoke.py 全部检查通过"
+      ]
+    },
+    {
+      "id": "M04",
+      "name": "评分校准（考核性 R1）",
+      "status": "done",
+      "spec": "modules/M04-score-calibration/SPEC.md",
+      "depends": ["M02"],
+      "produces": [
+        "packages/indicator_engine/calibration.py",
+        "tests/test_calibration.py"
+      ],
+      "verify": [
+        "python -m pytest tests/test_calibration.py -q 通过"
+      ]
+    },
+    {
+      "id": "M05",
+      "name": "人工复核与申诉闭环（R2/R3）",
+      "status": "done",
+      "spec": "modules/M05-review-appeal/SPEC.md",
+      "depends": ["M02"],
+      "produces": [
+        "data/ddl/05_review_appeal.sql"
+      ],
+      "verify": [
+        "data/ddl/05_review_appeal.sql 含 human_review_checklist 与 appeal_record 两张表的 DDL"
+      ]
+    },
+    {
+      "id": "M06",
+      "name": "模型网关",
+      "status": "done",
+      "spec": "modules/M06-llm-gateway/SPEC.md",
+      "depends": ["M00"],
+      "produces": [
+        "packages/llm_gateway/gateway.py",
+        "packages/llm_gateway/providers.json"
+      ],
+      "verify": [
+        "python -c \"from packages.llm_gateway.gateway import route; print('ok')\" 无报错"
+      ]
+    },
+    {
+      "id": "M07",
+      "name": "Agent 编排（Planner/Retriever/Critic）",
+      "status": "done",
+      "spec": "modules/M07-agent/SPEC.md",
+      "depends": ["M02", "M06"],
+      "produces": [
+        "packages/agent/planner.py",
+        "packages/agent/critic.py"
+      ],
+      "verify": [
+        "python -c \"from packages.agent.planner import plan; print('ok')\" 无报错"
+      ]
+    },
+    {
+      "id": "M08",
+      "name": "证据合成器",
+      "status": "done",
+      "spec": "modules/M08-evidence-composer/SPEC.md",
+      "depends": ["M02", "M07"],
+      "produces": [
+        "packages/agent/composer.py"
+      ],
+      "verify": [
+        "python -c \"from packages.agent.composer import compose; print('ok')\" 无报错"
+      ]
+    },
+    {
+      "id": "M09",
+      "name": "REST API（FastAPI）",
+      "status": "done",
+      "spec": "modules/M09-api/SPEC.md",
+      "depends": ["M02", "M07", "M08"],
+      "produces": [
+        "apps/api/main.py"
+      ],
+      "verify": [
+        "python -c \"import apps.api.main\" 无报错"
+      ]
+    },
+    {
+      "id": "M10",
+      "name": "Web 对话台与看板",
+      "status": "done",
+      "spec": "modules/M10-web/SPEC.md",
+      "depends": ["M09"],
+      "produces": [
+        "apps/web/index.html"
+      ],
+      "verify": [
+        "apps/web/index.html 存在"
+      ]
+    },
+    {
+      "id": "M11",
+      "name": "权限与审计",
+      "status": "done",
+      "spec": "modules/M11-auth-audit/SPEC.md",
+      "depends": ["M09"],
+      "produces": [
+        "data/ddl/11_auth_audit.sql",
+        "packages/core/authz.py"
+      ],
+      "verify": [
+        "data/ddl/11_auth_audit.sql 存在",
+        "python -c \"from packages.core import authz; print('ok')\" 无报错"
+      ]
+    },
+    {
+      "id": "M12",
+      "name": "Golden Set 回归评测",
+      "status": "done",
+      "spec": "modules/M12-golden-eval/SPEC.md",
+      "depends": ["M07", "M08"],
+      "produces": [
+        "tests/golden/golden_set.json",
+        "tests/golden/run_eval.py"
+      ],
+      "verify": [
+        "python tests/golden/run_eval.py --smoke 通过"
+      ]
+    },
+    {
+      "id": "M13",
+      "name": "单文件 exe 打包（PyInstaller）",
+      "status": "done",
+      "spec": "modules/M13-packaging/SPEC.md",
+      "depends": ["M09", "M10"],
+      "produces": [
+        "scripts/../run_app.py",
+        "build_exe.py",
+        "packages/core/frozen_paths.py",
+        "dist/TeacherEval/TeacherEval.exe"
+      ],
+      "verify": [
+        "dist/TeacherEval/TeacherEval.exe eval --teacher T001 输出报告",
+        "TeacherEval.exe serve 启动后 /health 返回 200",
+        "TeacherEval.exe serve 下 /api/v1/chat 与 / 均返回 200"
+      ]
+    }
+  ],
+  "work_rule": {
+    "one_agent_per_step": "当前对话的内存上限决定一个 agent 不用'一次写完整个项目'，而是每一步只认领一个 module id，读该 module 的 SPEC.md，交付 produce 清单并跑通 verify",
+    "no_hallucination": "agent 只能在 SPEC 中声明的粒度内工作，任何超出 SPEC 的假设必须先写回 SPEC 再执行",
+    "acceptance_gate": "每个 module 交付后先跑 verify（本地命令，不需要真实数据或 API key），跑通才允许标记 done",
+    "next_step_query": "每条对话先跑 scripts/module_board.py，寻找 status=todo 且依赖全 done 的模块作为下一步"
+  }
+}
