@@ -1,0 +1,11 @@
+llm_config.json
+dist/
+build/
+vendor_pkgs/
+downloads/
+__pycache__/
+*.pyc
+output/
+data/real/*.sqlite
+data/real/*.csv
+教育数字化数据库.zip
