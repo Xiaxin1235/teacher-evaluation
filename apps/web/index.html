@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教师与学校数字化评估系统</title>
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<style>
+  :root {
+    --primary: #c96442;         /* 暖陶土主色 */
+    --primary-hover: #b35334;
+    --primary-light: #faeee9;
+    --accent: #d97706;          /* 暖琥珀色 */
+    --danger: #b91c1c;          /* 警示暖红 */
+    --warn: #b45309;            /* 柔和赭石 */
+    --ok: #276b32;              /* 舒缓叶绿 */
+    --bg: #f9f8f6;              /* 温暖米白底色 */
+    --card: #ffffff;            /* 纯白卡片 */
+    --card-subtle: #fcfbf9;     /* 浅温底 */
+    --surface-soft: #f2efe9;    /* 柔和温润表面灰 */
+    --line: #e8e6df;            /* 极轻淡暖灰边框 */
+    --line-subtle: #f0eee8;     /* 极细分隔线 */
+    --text-main: #201f1d;       /* 柔和炭黑 */
+    --text-muted: #6f6c65;      /* 暖铅灰色 */
+    --text-light: #9c978e;      /* 提示文字弱化 */
+    --radius-xl: 18px;          /* 大圆角 */
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.02), 0 6px 18px -4px rgba(0, 0, 0, 0.03);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-main);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .header {
+    background: #ffffff;
+    color: var(--text-main);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+  }
+  .header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header h1 .brand-badge {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+  }
+  .header .sub {
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+  .header .apiDot {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--surface-soft);
+    padding: 4px 12px;
+    border-radius: 9999px;
+    border: 1px solid var(--line);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  .header .apiDot.on {
+    background: #eef7ee;
+    color: var(--ok);
+    border-color: #d1ead2;
+    font-weight: 500;
+  }
+  .container {
+    max-width: 1060px;
+    margin: 28px auto;
+    padding: 0 24px;
+  }
+  .tabs {
+    display: inline-flex;
+    gap: 4px;
+    margin-bottom: 22px;
+    background: #eeebe4;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid #e2ded5;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 8px 18px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+  }
+  .tab:hover {
+    color: var(--text-main);
+  }
+  .tab.active {
+    background: #ffffff;
+    color: var(--text-main);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 26px 30px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  input[type=text], input[type=password], select {
+    padding: 10px 14px;
+    border: 1px solid #dedbd2;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--text-main);
+    background: #ffffff;
+    flex: 1;
+    min-width: 180px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input[type=text]:focus, input[type=password]:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.12);
+  }
+  input::placeholder {
+    color: var(--text-light);
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-0.5px);
+  }
+  button:active {
+    transform: translateY(0);
+  }
+  button.secondary {
+    background: #eeebe4;
+    color: var(--text-main);
+    border: 1px solid #ded9cd;
+  }
+  button.secondary:hover {
+    background: #e4e0d5;
+  }
+  button.ghost {
+    background: #ffffff;
+    color: var(--text-muted);
+    border: 1px solid #dedbd2;
+  }
+  button.ghost:hover {
+    background: #faf9f6;
+    color: var(--text-main);
+    border-color: #cfccc2;
+  }
+  .banner {
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    margin: 14px 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .banner.red {
+    background: #fdf3f1;
+    color: #a12d1f;
+    border: 1px solid #fae0dc;
+  }
+  .banner.warn {
+    background: #fdf9ee;
+    color: #92580a;
+    border: 1px solid #faeed1;
+  }
+  .banner.ok {
+    background: #f0f7f0;
+    color: #216a2b;
+    border: 1px solid #d8ebd9;
+  }
+  .banner.disclaimer {
+    background: #f6f5f0;
+    color: var(--text-muted);
+    border: 1px solid #ebe8df;
+    font-size: 12.5px;
+  }
+  .statGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+  }
+  .stat {
+    text-align: center;
+    padding: 16px 14px;
+    background: #faf9f6;
+    border-radius: var(--radius-md);
+    border: 1px solid #f0eee6;
+  }
+  .stat .v {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: -0.01em;
+  }
+  .stat .l {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .section {
+    margin: 14px 0;
+    padding: 18px 22px;
+    border: 1px solid var(--line-subtle);
+    border-radius: var(--radius-md);
+    background: #faf9f6;
+  }
+  .section h3 {
+    margin: 0 0 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .ev {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: #ffffff;
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    display: inline-block;
+    margin: 3px 4px 3px 0;
+    border: 1px solid #eae8e1;
+  }
+  .gap {
+    font-size: 12px;
+    color: var(--warn);
+    margin-top: 4px;
+  }
+  .redline {
+    font-weight: 600;
+    color: var(--danger);
+  }
+  #radar {
+    width: 100%;
+    max-width: 520px;
+    margin: 12px auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 12px;
+    background: #faf9f6;
+  }
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line-subtle);
+    text-align: left;
+  }
+  tr.clickable {
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+  tr.clickable:hover {
+    background: #f7f6f1;
+  }
+  #loading {
+    display: none;
+    text-align: center;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 24px;
+  }
+  .mockNote {
+    font-size: 12.5px;
+    color: var(--text-light);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    background: #f0eee6;
+    color: #403d35;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #e4e1d7;
+  }
+  .ep {
+    font-size: 12.5px;
+    color: var(--text-main);
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 860px) {
+    .split { grid-template-columns: 1fr; }
+    .header { padding: 14px 20px; }
+    .container { padding: 0 16px; margin: 16px auto; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>教师与学校数字化评估系统</h1>
+  <span class="sub">界面 v3.12 · 全量 83 题数字问卷 / 教师多源评估 / 模型协同</span>
+  <span class="apiDot" id="dbDot" style="margin-left:auto">数据库：未检测</span>
+  <span class="apiDot" id="apiDot">接口：未检测</span>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" data-tab="chat">对话台</div>
+    <div class="tab" data-tab="profile">简介查询</div>
+    <div class="tab" data-tab="api">模型密钥</div>
+  </div>
+
+  <div id="tab-chat">
+    <div class="card">
+      <div class="row">
+        <input type="text" id="question" placeholder="输入您想评估的问题，例如：某校配置了多少台平板？某校在区里排第几名？武汉市数字化水平怎么样？">
+        <button id="btnAsk">提问 / 评估</button>
+      </div>
+      <div class="mockNote">已接入 37.48 万所中小学 2020–2023 全量 83 题数字化作答库与教师演示库。支持自由提问：① 微观指标事实问答（如教师/学生平板电脑、网络带宽、生机比等）；② 区域宏观数字化大盘与排位对比（如区县/地市数字化水平、某校在区里排第几名、超全区百分比等）；③ 多轮上下文追问（如「那学生平板呢？」「它在区里排第几？」）；④ 整校综合评估与教师多维评估。</div>
+    </div>
+    <div id="loading" class="card">评估与分析中，请稍候…</div>
+    <div id="chatResult">
+      <div class="card" style="text-align:center;padding:48px 24px;color:var(--text-muted);">
+        <div style="font-size:32px;margin-bottom:14px;color:var(--primary);">💬</div>
+        <h3 style="font-size:17px;font-weight:600;color:var(--text-main);margin:0 0 8px;">准备就绪，等待提问</h3>
+        <p style="font-size:13.5px;max-width:540px;margin:0 auto 16px;line-height:1.65;color:var(--text-muted);">
+          系统支持开放式自然语言提问与多轮对话。您可以在上方输入具体学校、教师或区域的数字化问题，按回车或点击「提问 / 评估」开始。
+        </p>
+        <div style="font-size:12.5px;color:var(--text-muted);background:var(--surface-soft);display:inline-block;padding:6px 14px;border-radius:9999px;border:1px solid var(--line);">
+          提示：初次登入不会自动发起查询，不消耗任何模型 API 额度
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-profile" style="display:none">
+    <div class="split">
+      <div class="card">
+        <h3 style="margin-top:0">示例教师档案（演示库）</h3>
+        <div class="row">
+          <select id="profileTeacher"></select>
+          <button id="btnTeacherProfile">查看教师档案</button>
+        </div>
+        <div class="mockNote">内置 T001–T004 典型学科示例教师档案（脱敏模拟），已汉化姓名、任教组别与职称信息。</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">学校简介（真实数字化库）</h3>
+        <div class="row">
+          <input type="text" id="schoolQ" placeholder="学校名关键词，如 成绩小学">
+          <input type="text" id="schoolYear" placeholder="年份，如 2020" style="max-width:120px;min-width:100px">
+          <button id="btnSchoolSearch">检索</button>
+        </div>
+        <div class="mockNote">从 37 万所学校记录中按名称模糊查询。</div>
+      </div>
+    </div>
+    <div id="profileResult"></div>
+  </div>
+
+  <div id="tab-api" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">模型 API（官方或中转）</h3>
+      <p class="mockNote">这里填的是 <b>DeepSeek / 通义 / Kimi / OpenAI 兼容中转站</b> 的地址和密钥，不是本机端口。密钥只保存在 exe 旁 <code>llm_config.json</code>，页面不回显完整 Key。</p>
+      <div class="row">
+        <select id="llmProvider" style="max-width:180px">
+          <option value="deepseek">DeepSeek 官方</option>
+          <option value="qwen">通义千问（DashScope）</option>
+          <option value="kimi">Kimi / Moonshot</option>
+          <option value="openai">OpenAI 官方</option>
+          <option value="custom">自定义中转（OpenAI 兼容）</option>
+        </select>
+        <input type="text" id="llmBase" placeholder="API 地址，如 https://api.deepseek.com/v1">
+      </div>
+      <div class="row" style="margin-top:10px">
+        <input type="password" id="llmKey" placeholder="API Key（sk-... 或中转密钥）" autocomplete="off">
+        <button class="secondary" id="btnDiscoverModels">识别可用模型</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <select id="llmModelSel" style="flex:1">
+          <option value="">先填地址和密钥，再点「识别可用模型」</option>
+        </select>
+        <input type="text" id="llmModel" placeholder="或手动填写模型名" style="max-width:220px">
+      </div>
+      <div class="row" style="margin-top:10px">
+        <input type="text" id="llmProfileName" placeholder="配置名称，如 官方DeepSeek / 单位中转">
+        <button id="btnSaveLlm">另存为新配置</button>
+        <button class="secondary" id="btnOverwriteLlm">覆盖当前配置</button>
+        <button class="secondary" id="btnPingLlm">探测连通</button>
+      </div>
+      <p class="mockNote">换一个名称再点「另存为新配置」会新增一套，不会改已有配置。只有同名或点「覆盖当前配置」才会改旧的。</p>
+      <div class="row" style="margin-top:10px">
+        <select id="llmProfileSel" style="flex:1">
+          <option value="">尚无已保存配置</option>
+        </select>
+        <button class="secondary" id="btnLoadProfile">切换使用</button>
+        <button class="ghost" id="btnDeleteProfile">删除此配置</button>
+      </div>
+      <div id="apiStatus"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">常用官方 / 中转地址</h3>
+      <div class="ep">DeepSeek：<code>https://api.deepseek.com/v1</code>　模型 <code>deepseek-chat</code></div>
+      <div class="ep">通义：<code>https://dashscope.aliyuncs.com/compatible-mode/v1</code>　模型 <code>qwen-plus</code></div>
+      <div class="ep">Kimi：<code>https://api.moonshot.cn/v1</code>　模型 <code>moonshot-v1-8k</code></div>
+      <div class="ep">OpenAI：<code>https://api.openai.com/v1</code>　模型 <code>gpt-4o-mini</code></div>
+      <div class="ep">中转站：必须填 <code>https://域名/v1</code>（不要填网站首页，例如不要填 https://ican-gpt.com）</div>
+      <p class="mockNote">分数仍由本地规则引擎计算，模型只做文字解读，不能改数字。</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+const MOCK = {
+  T001: {
+    overview: { teacher_id:"T001", teacher_dept:"数学组", school_years:["2023-2024","2024-2025"], template:"2025-2026学年 教学评估 v1（示例）",
+      total_score:83.13, overall_confidence:1.0, data_coverage:1.0, redline_flagged:false },
+    sections: [
+      { dimension:"教学设计", conclusion:"得分 100.0 分（置信度 1.0）。", score:100, confidence:1,
+        evidence_refs:["[证据: 教学设计与备课表 | 评估学年: 2023-2024、2024-2025 | 已交课时 547.0 / 应授课时 547.0]"], gaps:[] },
+      { dimension:"课堂教学", conclusion:"得分 86.5 分（置信度 1.0）。", score:86.5, confidence:1,
+        evidence_refs:["[证据: 课堂随堂听课评议 | 6次随堂听课评分均值]"], gaps:[] },
+      { dimension:"教学效果", conclusion:"得分 64.45 分（置信度 1.0）。", score:64.45, confidence:1,
+        evidence_refs:["[证据: 期末学业成绩库 | 任教班级及格率相对年级基线增值]"], gaps:[] },
+      { dimension:"教研与学术", conclusion:"得分 100.0 分（置信度 1.0）。", score:100, confidence:1,
+        evidence_refs:["[证据: 教科研成果与获奖表 | 国家/省市级成果加权累计得分]"], gaps:[] },
+      { dimension:"学生评教", conclusion:"得分 89.43 分（置信度 1.0）。", score:89.43, confidence:1,
+        evidence_refs:["[证据: 学生评教问卷库 | 120份学生有效问卷综合均分]"], gaps:[] },
+      { dimension:"师德师风（红线）", is_redline:true, flagged:false, conclusion:"未触发红线标记。",
+        evidence_refs:["[证据: 师德师风合规审查表 | 查实违纪/投诉=0起]"], gaps:[] },
+    ],
+    disclaimer:"本报告为辅助参考材料，供评审委员会人工复核使用；不构成人事裁决的独立依据（考核性 R4）。"
+  },
+  T003: {
+    overview: { teacher_id:"T003", teacher_dept:"语文组", school_years:["2023-2024","2024-2025"], template:"2025-2026学年 教学评估 v1（示例）",
+      total_score:70.92, overall_confidence:0.78, data_coverage:0.65, redline_flagged:true },
+    sections: [
+      { dimension:"教学设计", conclusion:"得分 50.0 分（置信度 1.0）。", score:50, confidence:1,
+        evidence_refs:["[证据: 教学设计与备课表 | 已交课时 305.5 / 应授课时 611.0]"], gaps:[] },
+      { dimension:"课堂教学", conclusion:"得分 75.2 分（置信度 0.7）。", score:75.2, confidence:0.7,
+        evidence_refs:["[证据: 课堂随堂听课评议 | 2次随堂听课评分均值]"], gaps:[] },
+      { dimension:"教学效果", conclusion:"数据不足以支持结论。", score:null, confidence:0.6,
+        evidence_refs:[], gaps:["无同口径基线可比"] },
+      { dimension:"教研与学术", conclusion:"得分 100.0 分（置信度 1.0）。", score:100, confidence:1,
+        evidence_refs:["[证据: 教科研成果与获奖表 | 级别加权累计得分]"], gaps:[] },
+      { dimension:"学生评教", conclusion:"得分 72.97 分（置信度 1.0）。", score:72.97, confidence:1,
+        evidence_refs:["[证据: 学生评教问卷库 | 60份学生有效问卷综合均分]"], gaps:[] },
+      { dimension:"师德师风（红线）", is_redline:true, flagged:true, conclusion:"已触发红线标记，本维度不参与评分，转独立人事流程。",
+        evidence_refs:["[证据: 师德师风合规审查表 | 查实违规/投诉=1起]"], gaps:[] },
+    ],
+    disclaimer:"本报告为辅助参考材料，供评审委员会人工复核使用；不构成人事裁决的独立依据（考核性 R4）。"
+  }
+};
+const MOCK_TREND = { "2023-2024": 74.63, "2024-2025": 87.63 };
+const MOCK_TEACHERS = [
+  {teacher_id:"T001", name:"张老师", dept_id:"数学组", title:"高级", hire_year:"2010", is_active:"1"},
+  {teacher_id:"T002", name:"李老师", dept_id:"数学组", title:"中级", hire_year:"2016", is_active:"1"},
+  {teacher_id:"T003", name:"王老师", dept_id:"语文组", title:"初级", hire_year:"2021", is_active:"1"},
+  {teacher_id:"T004", name:"赵老师", dept_id:"英语组", title:"高级", hire_year:"2005", is_active:"1"}
+];
+
+const TEACHER_NAME_MAP = {
+  "T001": "张老师",
+  "T002": "李老师",
+  "T003": "王老师",
+  "T004": "赵老师"
+};
+
+const TEACHER_TITLE_MAP = {
+  "高级": "高级教师 (正高/副高级职称)",
+  "中级": "一级教师 (中级职称)",
+  "初级": "二级/初级教师"
+};
+
+const TEACHER_SOURCE_DESC_MAP = {
+  "course_period": { name: "课时排课记录表", desc: "日常授课周课时、所教班级与学年排课底册" },
+  "lesson_plan": { name: "备课教案设计表", desc: "单元教案教学设计完成度与备课提交审核记录" },
+  "class_observation": { name: "随堂听课评议表", desc: "专家督导与同行组内随堂听课评分与实录评议" },
+  "exam_score": { name: "期末学业成绩库", desc: "任教班级期末成绩综合表现及及格率相对年级增值" },
+  "research_record": { name: "教科研成果表", desc: "国家/省/市/校各级教研论文发表、课题及获奖" },
+  "student_survey": { name: "学生评教问卷表", desc: "任教班级学生匿名教学满意度评价多维打分" },
+  "complaint_record": { name: "信访投诉核实表", desc: "师德违规信访举报核查结果记录（查实触发红线）" },
+  "discipline_record": { name: "师德处分记录表", desc: "行政处分与违规纪律档案（师德师风一票否决）" }
+};
+
+const DATA_SOURCE_MAP = {
+  "course_period": "课时排课记录表",
+  "lesson_plan": "备课教案设计表",
+  "class_observation": "随堂听课评议表",
+  "exam_score": "期末学业成绩库",
+  "student_survey": "学生评教问卷表",
+  "research_record": "教科研成果表",
+  "complaint_record": "信访投诉核实表",
+  "discipline_record": "师德处分记录表",
+  "teacher_info": "教师基础人事档案",
+  "lesson_plan_coverage": "教案覆盖度",
+  "observation_score": "课堂听课评分",
+  "pass_rate_improvement": "及格率增值",
+  "survey_avg": "学生评教均分",
+  "research_score": "教科研成果积分",
+  "redline": "师德红线检查",
+  "school_answers": "学校数字化问卷作答库",
+  "schools": "全国学校基础信息库",
+  "questions": "数字化评估指标题库",
+  "answers.normalized_value": "问卷作答归一值 (0~1)"
+};
+
+const FIELD_MAP = {
+  province: "所属省份",
+  city: "所属地市",
+  district: "所属区县",
+  school_area_type: "城乡性质分类",
+  class_num: "班级总数",
+  teacher_num: "专任教师人数",
+  student_num: "在校生总数",
+  same_name_years: "建档历史学年"
+};
+
+function formatSourceName(src) {
+  if (!src) return "";
+  if (DATA_SOURCE_MAP[src]) return DATA_SOURCE_MAP[src];
+  let res = String(src);
+  Object.entries(DATA_SOURCE_MAP).forEach(([en, zh]) => {
+    res = res.split(en).join(zh);
+  });
+  return res;
+}
+
+function formatFormula(f) {
+  let s = String(f || "");
+  s = s.replace(/avg of (\d+) observations/g, "共采集 $1 次随堂听课评分均值");
+  s = s.replace(/avg of (\d+) responses, 1-5 scale -> x20/g, "共采集 $1 份学生评教问卷(5分制换算百分制)");
+  s = s.replace(/class_pass_rate - cohort_baseline_pass_rate/g, "任教班级及格率相对年级基准线增值");
+  s = s.replace(/normalized_value × 100/g, "问卷原始归一值 × 100 折算分");
+  s = s.replace(/sum\(level_score \* count\)/g, "各级教科研成果加权累计得分");
+  s = s.replace(/查实投诉=(\d+), 查实违规=(\d+)/g, "查实信访投诉=$1起，查实纪律违规=$2起");
+  return s;
+}
+
+function formatEvidenceText(e) {
+  if (typeof e === "object" && e !== null) {
+    const label = DATA_SOURCE_MAP[e.metric] || e.label || e.metric || "指标依据";
+    const src = formatSourceName(e.source || "");
+    const rawVal = e.raw != null ? e.raw : "-";
+    const f = formatFormula(e.formula || "");
+    const period = Array.isArray(e.period) ? e.period.join(", ") : (e.period || "");
+    let parts = [`证据: ${label}`];
+    if (period) parts.push(`学年: ${period}`);
+    if (src) parts.push(`数据源: ${src}`);
+    if (f) parts.push(`核算说明: ${f}`);
+    else parts.push(`数值: ${rawVal}`);
+    return `[${parts.join(" | ")}]`;
+  }
+  let s = String(e || "");
+  // 汉化学年列表格式如 ['2024-2025']
+  s = s.replace(/\['(\d{4}-\d{4})'\]/g, "$1 学年");
+  s = s.replace(/\['([^']+)'\]/g, "$1");
+  // 汉化常见公式与英文
+  s = s.replace(/avg of (\d+) observations/g, "共 $1 次随堂听课评分均值");
+  s = s.replace(/avg of (\d+) responses, 1-5 scale -> x20/g, "共 $1 份学生评教问卷均分(5分制换算百分制)");
+  s = s.replace(/class_pass_rate - cohort_baseline_pass_rate/g, "任教班级及格率相对年级基准线增值");
+  s = s.replace(/sum\(level_score \* count\)/g, "各级教科研成果加权累计积分");
+  s = s.replace(/verified complaints=(\d+)/g, "查实违规/投诉=$1起");
+  s = s.replace(/查实投诉=(\d+),\s*查实违规=(\d+)/g, "查实信访投诉=$1起，查实纪律处分=$2起");
+  s = s.replace(/answers\.normalized_value/g, "学校问卷作答库(归一值)");
+  s = s.replace(/normalized_value × 100/g, "问卷原始归一值 × 100 折算分");
+  return s;
+}
+
+function getApiBase() {
+  try { localStorage.removeItem("te_api_base"); } catch (e) {}
+  return ""; // 永远打本机同源 /api，不要用官方/中转地址当本机基址
+}
+function apiUrl(path) {
+  if (path.startsWith("http")) return path;
+  return path;
+}
+function fetchErrorHint(err) {
+  const msg = String((err && err.message) || err || "");
+  if (/failed to fetch|networkerror|load failed/i.test(msg)) {
+    return "浏览器没连上本机程序（不是模型官网回的错）。请确认：① 黑窗口里的 TeacherEval 还在运行；② 地址栏是 127.0.0.1:8610 而不是官方 API 网址；③ 用 Ctrl+F5 刷新。原始错误：" + msg;
+  }
+  return msg;
+}
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+function radarChart(el, data, compData, names) {
+  if (!el) return;
+  if (typeof echarts === "undefined") { el.innerHTML = '<p class="mockNote">ECharts CDN 未加载（离线），跳过雷达图。</p>'; return; }
+  const ch = echarts.init(el);
+  const dims = Object.keys(data || {});
+  const n1 = (names && names[0]) || "得分";
+  const n2 = (names && names[1]) || "全区均分";
+
+  const seriesData = [{
+    value: dims.map(d => data[d] ?? 0),
+    name: n1,
+    itemStyle: { color: "#c96442" },
+    lineStyle: { color: "#c96442", width: 2 },
+    areaStyle: { color: "rgba(201, 100, 66, 0.18)" }
+  }];
+
+  if (compData && Object.keys(compData).length) {
+    seriesData.push({
+      value: dims.map(d => compData[d] ?? 0),
+      name: n2,
+      itemStyle: { color: "#3b82f6" },
+      lineStyle: { color: "#3b82f6", width: 2, type: "dashed" },
+      areaStyle: { color: "rgba(59, 130, 246, 0.10)" }
+    });
+  }
+
+  ch.setOption({
+    tooltip: {
+      backgroundColor: "#201f1d",
+      borderColor: "#201f1d",
+      textStyle: { color: "#ffffff", fontSize: 12 }
+    },
+    legend: (compData && Object.keys(compData).length) ? {
+      data: [n1, n2],
+      top: 0,
+      textStyle: { color: "#6f6c65", fontSize: 12 }
+    } : undefined,
+    radar: {
+      indicator: dims.map(d => ({ name: d, max: 100 })),
+      splitArea: {
+        areaStyle: {
+          color: ['rgba(250, 249, 245, 0.6)', 'rgba(243, 240, 234, 0.6)']
+        }
+      },
+      axisLine: { lineStyle: { color: 'rgba(0, 0, 0, 0.08)' } },
+      splitLine: { lineStyle: { color: 'rgba(0, 0, 0, 0.08)' } },
+      axisName: {
+        color: '#6f6c65',
+        fontSize: 12,
+        fontWeight: 500
+      }
+    },
+    series: [{
+      type: "radar",
+      data: seriesData
+    }]
+  });
+}
+
+function renderAgentVisuals(report) {
+  const charts = report.charts || [];
+  const toolCalls = report.tool_calls || [];
+  if (!charts.length && !toolCalls.length) return "";
+
+  let html = '<div class="section" style="margin-top:20px;border-top:1px solid var(--line);padding-top:18px;">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">';
+  html += '<div style="font-size:15px;font-weight:600;color:var(--text-main);display:flex;align-items:center;gap:6px;">'
+    + '<span style="display:inline-block;width:8px;height:8px;background:var(--primary);border-radius:50%;"></span>'
+    + '🛠️ Agent 本地工具调用与数据可视化'
+    + '</div>';
+  html += '<div style="font-size:12px;color:var(--primary);background:var(--primary-light);padding:3px 10px;border-radius:9999px;font-weight:500;">Python 3.12 · Matplotlib 高清绘图</div>';
+  html += '</div>';
+
+  // 1. 渲染高清图表卡片
+  charts.forEach((ch, idx) => {
+    const src = ch.base64 || apiUrl(ch.url);
+    const title = ch.title || ("可视化分析图 #" + (idx + 1));
+    html += '<div style="background:#ffffff;border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-card);margin-bottom:16px;">';
+    html += '<div style="padding:10px 16px;background:var(--card-subtle);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:gap;gap:6px;">';
+    html += '<span style="font-size:13.5px;font-weight:600;color:var(--text-main);">' + esc(title) + '</span>';
+    html += '<a href="' + src + '" download="' + esc(ch.filename || "chart.png") + '" target="_blank" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:500;">查看原图 / 下载 ↗</a>';
+    html += '</div>';
+    html += '<div style="padding:16px;text-align:center;background:#ffffff;">';
+    html += '<img src="' + src + '" alt="' + esc(title) + '" style="max-width:100%;height:auto;border-radius:var(--radius-md);display:block;margin:0 auto;box-shadow:0 1px 4px rgba(0,0,0,0.04);cursor:zoom-in;" onclick="window.open(this.src,\'_blank\')">';
+    html += '</div>';
+    html += '</div>';
+  });
+
+  // 2. 渲染 Agent 工具调用轨迹抽屉（展示生成的 Python 代码和执行输出）
+  toolCalls.forEach((tc) => {
+    const isOk = tc.success;
+    const dur = tc.duration_ms ? tc.duration_ms + 'ms' : '';
+    const code = (tc.data && tc.data.code) || '';
+    const stdout = tc.stdout || '';
+    html += '<details style="margin-top:10px;background:#faf8f5;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 14px;">';
+    html += '<summary style="font-size:12.5px;color:var(--text-muted);cursor:pointer;user-select:none;font-weight:500;display:flex;align-items:center;justify-content:space-between;">';
+    html += '<span>⚡ <b>[' + esc(tc.tool || 'python_interpreter') + ']</b> ' + (isOk ? '执行成功' : '<span style="color:var(--danger)">执行异常</span>') + ' · 查看 Agent 编写的 Python 绘图代码与输出</span>';
+    html += '<span style="font-size:11.5px;color:var(--text-light);">' + esc(dur) + '</span>';
+    html += '</summary>';
+    html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);">';
+    if (code) {
+      html += '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">Agent 执行的 Python 脚本：</div>';
+      html += '<pre style="background:#1e1e1e;color:#d4d4d4;padding:12px 14px;border-radius:8px;font-size:12px;overflow-x:auto;line-height:1.55;font-family:Consolas,Monaco,monospace;margin:0 0 10px 0;"><code>' + esc(code) + '</code></pre>';
+    }
+    if (stdout) {
+      html += '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;">控制台输出日志：</div>';
+      html += '<pre style="background:#f0eee8;color:#201f1d;padding:8px 12px;border-radius:6px;font-size:11.5px;overflow-x:auto;margin:0;"><code>' + esc(stdout) + '</code></pre>';
+    }
+    if (tc.error) {
+      html += '<div style="color:var(--danger);font-size:12px;margin-top:6px;">错误信息: ' + esc(tc.error) + '</div>';
+    }
+    html += '</div></details>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderLlmSection(report, title) {
+  if (!report._llmText) return "";
+  const txt = String(report._llmText || "");
+  const isErr = txt.startsWith("模型未调用：") || txt.startsWith("调用失败") || txt.includes("temporarily unavailable") || txt.includes("502") || txt.includes("503") || txt.includes("504") || txt.includes("overloaded");
+
+  if (isErr) {
+    let cleanErr = txt.replace(/^模型未调用：/, "").trim();
+    return '<div class="section llm-box" style="background:#fffaf0;border-left:4px solid #f59e0b;border-radius:var(--radius-md);padding:14px 18px;margin-top:16px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
+      + '<h3 style="color:#d97706;margin:0;font-size:15px;display:flex;align-items:center;gap:6px;">'
+      + '<span>⚡</span> ' + esc(title || "智能 AI 诊断与解读")
+      + '<span style="font-size:11.5px;font-weight:normal;color:#92400e;background:#fef3c7;padding:2px 8px;border-radius:12px;">模型服务瞬时繁忙</span>'
+      + '</h3>'
+      + '<button class="ghost btnRetryLlm" style="padding:4px 12px;font-size:12.5px;color:#d97706;border-color:#fcd34d;background:#fff;cursor:pointer;">重新解读 ↻</button>'
+      + '</div>'
+      + '<div style="font-size:13.5px;color:#92400e;line-height:1.6;margin-top:8px;">'
+      + esc(cleanErr) + '<br>'
+      + '<span style="font-size:12px;color:#78350f;opacity:0.9;">💡 提示：本报告所有统计得分、维度均分、梯队排位及 Matplotlib 综合图表均直接由本地 SQLite 真实数据库计算生成，数据准确完整。</span>'
+      + '</div>'
+      + '</div>';
+  }
+
+  return '<div class="section llm-box" style="background:#faf8f5;border-left:4px solid var(--primary);border-radius:var(--radius-md);padding:14px 18px;margin-top:16px;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">'
+    + '<h3 style="color:var(--primary);margin:0;font-size:15px;display:flex;align-items:center;gap:6px;">'
+    + '<span>✨</span> ' + esc(title || "智能 AI 诊断与建议")
+    + '</h3>'
+    + '<button class="ghost btnRetryLlm" style="padding:3px 10px;font-size:12px;color:var(--text-muted);border-color:var(--line);cursor:pointer;" title="重新请求大模型解读">刷新解读 ↻</button>'
+    + '</div>'
+    + '<div class="llm-content" style="font-size:14px;line-height:1.75;white-space:pre-wrap;color:#201f1d;">' + esc(txt) + '</div>'
+    + '</div>';
+}
+
+function bindRetryLlm(report, into) {
+  const container = into || document.getElementById("chatResult");
+  if (!container) return;
+  container.querySelectorAll(".btnRetryLlm").forEach(btn => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = "正在发起解读...";
+      try {
+        const resp = await fetch(apiUrl("/api/v1/llm/interpret"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            markdown: report.markdown || "",
+            question: report._question || document.getElementById("question").value.trim()
+          })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res.text) {
+            report._llmText = res.text;
+          } else if (res.error) {
+            report._llmText = "模型未调用：" + res.error;
+          }
+          renderReport(report, container);
+        } else {
+          btn.textContent = "重试未成功";
+          setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+        }
+      } catch (e) {
+        btn.textContent = "网络连接异常";
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+      }
+    };
+  });
+}
+
+function renderReport(report, into) {
+  const o = report.overview || report;
+  const objType = o.object_type || "teacher";
+
+  // 分支 1：学校具体指标客观事实卡片
+  if (objType === "school_fact") {
+    let html = '<div class="card">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">';
+    html += '<span style="background:var(--primary-light);color:var(--primary);font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">指标事实问答</span>';
+    const loc = [o.province, o.city, o.district].filter(Boolean).join(" · ");
+    if (loc) html += '<span style="font-size:13px;color:var(--text-muted);">' + esc(loc) + '</span>';
+    if (o.school_type) html += '<span style="font-size:13px;color:var(--text-muted);">· ' + esc(o.school_type) + '</span>';
+    html += '<span style="font-size:13px;color:var(--text-muted);">· 监测年份：' + esc((o.school_years || [o.year || '2023']).join(", ")) + '</span>';
+    html += '</div>';
+    html += '<h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">' + esc(o.school_name) + ' · ' + esc(o.metric_name || "指标核查") + '</h2>';
+
+    // 核心数值卡片
+    html += '<div style="background:linear-gradient(135deg, #fff9f6 0%, #ffffff 100%);border:1px solid #f6ded5;border-radius:var(--radius-lg);padding:22px 26px;margin-bottom:18px;">';
+    if (o.question_id) {
+      html += '<div style="font-size:12.5px;color:var(--primary);font-weight:600;margin-bottom:8px;">官方题库第 ' + o.question_id + ' 题 · ' + esc(o.dimension || '基础设施') + ' / ' + esc(o.sub_dimension || '终端配置') + '</div>';
+    }
+    html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px;">';
+    html += '<span style="font-size:42px;font-weight:700;color:var(--primary);line-height:1;">' + (o.target_value ?? '-') + '</span>';
+    html += '<span style="font-size:16px;font-weight:500;color:var(--text-muted);">' + esc(o.unit || '台') + '</span>';
+    if (o.normalized_score != null) {
+      html += '<span style="font-size:13px;color:var(--text-light);margin-left:8px;">(问卷归一得分折算: ' + o.normalized_score + ' 分)</span>';
+    }
+    html += '</div>';
+    html += '<div style="font-size:15px;color:var(--text-main);line-height:1.65;border-top:1px dashed #f2e2db;padding-top:10px;">' + esc(o.direct_answer || '') + '</div>';
+    html += '</div>';
+
+    // 关联配置背景
+    const contextFacts = report.context_facts || [];
+    if (contextFacts.length) {
+      html += '<div class="section">';
+      html += '<h3 style="margin-top:0;">关联规模与配置背景</h3>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-top:10px;">';
+      contextFacts.forEach(c => {
+        html += '<div style="background:#ffffff;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 14px;">';
+        html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:2px;">' + esc(c.label) + '</div>';
+        html += '<div style="font-size:16px;font-weight:600;color:var(--text-main);">' + esc(c.value) + '</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // 跨学年历史记录
+    const history = report.history || [];
+    if (history.length > 1) {
+      html += '<div class="section">';
+      html += '<h3 style="margin-top:0;">历史年度登记追踪</h3>';
+      html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">';
+      history.forEach(h => {
+        const isCur = String(h.year) === String(o.year || (o.school_years || [])[0]);
+        html += '<div style="background:' + (isCur ? 'var(--primary-light)' : '#ffffff') + ';border:1px solid ' + (isCur ? 'var(--primary)' : 'var(--line)') + ';border-radius:var(--radius-md);padding:8px 16px;text-align:center;min-width:90px;">';
+        html += '<div style="font-size:12px;color:' + (isCur ? 'var(--primary)' : 'var(--text-muted)') + ';">' + esc(h.year) + ' 年' + (isCur ? ' (本期)' : '') + '</div>';
+        html += '<div style="font-size:16px;font-weight:600;color:' + (isCur ? 'var(--primary)' : 'var(--text-main)') + ';">' + esc(h.value) + '</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // 模型解读
+    html += renderLlmSection(report, "智能事实研判与解读");
+
+    html += renderAgentVisuals(report);
+    html += '<div class="banner disclaimer">' + esc(report.disclaimer || "本数据源自学校在国家/省级教育数字化问卷的官方填报作答库，供核查参考。") + '</div>';
+    html += '<div style="margin-top:16px;display:flex;gap:10px;">';
+    html += '<button class="secondary" id="btnEvalWholeSchool" data-name="' + esc(o.school_name) + '" data-year="' + esc(o.year || '') + '">综合评估该校数字化发展水平</button>';
+    html += '</div>';
+    html += '</div>';
+    into.innerHTML = html;
+    bindRetryLlm(report, into);
+    const btn = document.getElementById("btnEvalWholeSchool");
+    if (btn) {
+      btn.onclick = () => {
+        document.getElementById("question").value = btn.dataset.name + " " + (btn.dataset.year || "") + " 数字化水平怎么样？";
+        document.getElementById("btnAsk").click();
+      };
+    }
+    return;
+  }
+
+  // 分支 1.5：学校区域数字化排位与对比卡片
+  if (objType === "school_ranking") {
+    let html = '<div class="card">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">';
+    html += '<span style="background:var(--primary-light);color:var(--primary);font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">区域排位与对比</span>';
+    html += '<span style="font-size:13px;color:var(--text-muted);">' + esc(o.region_name || "") + '</span>';
+    html += '<span style="font-size:13px;color:var(--text-muted);">· 监测学年：' + esc((o.school_years || [o.year || '2023']).join(", ")) + '</span>';
+    html += '</div>';
+    html += '<h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">' + esc(o.school_name) + ' · 区域排位与综合对比</h2>';
+
+    // 核心排位数值大卡片
+    html += '<div style="background:linear-gradient(135deg, #fff9f6 0%, #ffffff 100%);border:1px solid #f6ded5;border-radius:var(--radius-lg);padding:22px 26px;margin-bottom:18px;">';
+    html += '<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap;">';
+    html += '<span style="font-size:38px;font-weight:700;color:var(--primary);line-height:1;">第 ' + (o.rank ?? '-') + ' 名</span>';
+    html += '<span style="font-size:16px;font-weight:500;color:var(--text-muted);">/ 全区共 ' + (o.total_schools ?? '-') + ' 所学校</span>';
+    html += '<span style="background:#faeee9;color:var(--primary);padding:3px 10px;border-radius:9999px;font-size:13px;font-weight:600;">前 ' + (o.top_pct ?? '-') + '%</span>';
+    html += '<span style="background:#eef7ee;color:var(--ok);padding:3px 10px;border-radius:9999px;font-size:13px;font-weight:600;">超越全区 ' + (o.beat_pct ?? '-') + '%</span>';
+    html += '</div>';
+    html += '<div style="font-size:15px;color:var(--text-main);line-height:1.65;border-top:1px dashed #f2e2db;padding-top:10px;">' + esc(o.direct_answer || '') + '</div>';
+    html += '</div>';
+
+    // 核心统计指标网格
+    const diffVal = o.diff != null ? (o.diff >= 0 ? '+' + o.diff : o.diff) : '-';
+    const diffColor = (o.diff != null && o.diff >= 0) ? 'var(--ok)' : 'var(--danger)';
+    html += '<div class="statGrid">'
+      + '<div class="stat"><div class="v">' + (o.total_score ?? "-") + ' 分</div><div class="l">本校综合均分</div></div>'
+      + '<div class="stat"><div class="v">' + (o.region_avg ?? "-") + ' 分</div><div class="l">全区综合均分</div></div>'
+      + '<div class="stat"><div class="v" style="color:' + diffColor + ';">' + diffVal + ' 分</div><div class="l">相对均分差额</div></div>'
+      + '<div class="stat"><div class="v" style="font-size:18px;">第 ' + (o.rank ?? "-") + ' / ' + (o.total_schools ?? "-") + '</div><div class="l">全区排位</div></div>'
+      + '</div>';
+
+    // 双线对比雷达图
+    html += '<div id="radar"></div>';
+
+    // 六大维度对比表格
+    const dims = report.dimensions_comparison || [];
+    if (dims.length) {
+      html += '<div class="section">';
+      html += '<h3 style="margin-top:0;">六大维度相对全区均值对照</h3>';
+      html += '<table><tr><th>评估维度</th><th>本校得分</th><th>全区均分</th><th>差值</th><th>表现状态</th></tr>';
+      dims.forEach(d => {
+        const dDiff = d.diff != null ? (d.diff >= 0 ? '+' + d.diff : d.diff) : '-';
+        const tag = d.is_lead ? '<span style="color:var(--ok);font-weight:600;">领先</span>' : '<span style="color:var(--warn);font-weight:600;">待提升</span>';
+        html += '<tr><td><b>' + esc(d.dimension) + '</b></td>'
+          + '<td><b>' + d.school_score + ' 分</b></td>'
+          + '<td>' + d.region_avg + ' 分</td>'
+          + '<td style="color:' + (d.is_lead ? 'var(--ok)' : 'var(--danger)') + ';font-weight:600;">' + dDiff + ' 分</td>'
+          + '<td>' + tag + '</td></tr>';
+      });
+      html += '</table></div>';
+    }
+
+    // 临近梯队学校
+    const peers = report.peer_schools || [];
+    if (peers.length) {
+      html += '<div class="section">';
+      html += '<h3 style="margin-top:0;">区域临近梯队学校对照</h3>';
+      html += '<table><tr><th>名次</th><th>学校名称</th><th>学段</th><th>数字化均分</th><th>状态</th><th>操作</th></tr>';
+      peers.forEach(p => {
+        const isSelf = p.is_target;
+        const rowBg = isSelf ? ' style="background:#fff7f3;"' : '';
+        html += '<tr' + rowBg + '><td><b>' + p.rank + '</b></td>'
+          + '<td><b>' + esc(p.school_name) + '</b></td>'
+          + '<td>' + esc(p.school_type || '中小学') + '</td>'
+          + '<td><span style="color:var(--primary);font-weight:600;">' + p.score + ' 分</span></td>'
+          + '<td>' + (isSelf ? '<span style="background:var(--primary);color:#fff;font-size:11px;padding:2px 8px;border-radius:9999px;font-weight:600;">当前本校</span>' : '<span style="color:var(--text-muted);font-size:12px;">对比参照</span>') + '</td>'
+          + '<td><button class="ghost btnPeerEval" data-name="' + esc(p.school_name) + '" data-year="' + esc((o.school_years||[])[0]||'') + '">深入评估</button></td></tr>';
+      });
+      html += '</table></div>';
+    }
+
+    // 模型智能解读
+    html += renderLlmSection(report, "智能排位研判与提升建议");
+
+    html += renderAgentVisuals(report);
+    html += '<div class="banner disclaimer">' + esc(report.disclaimer || "本排名基于区域全量中小学在国家/省数字化问卷官方填报作答折算均分，供教育视导与学校定位参考。") + '</div>';
+    html += '<div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">';
+    html += '<button class="secondary" id="btnRankToFact" data-name="' + esc(o.school_name) + '">查看该校设备配置事实</button>';
+    html += '<button class="secondary" id="btnRankToRegion" data-region="' + esc(o.region_name) + '" data-year="' + esc((o.school_years||[])[0]||'') + '">查看全区数字化大盘</button>';
+    html += '<button class="ghost" id="btnRankToWholeSchool" data-name="' + esc(o.school_name) + '" data-year="' + esc((o.school_years||[])[0]||'') + '">整校数字化六维深度评估</button>';
+    html += '</div>';
+    html += '</div>';
+    into.innerHTML = html;
+    bindRetryLlm(report, into);
+
+    radarChart(
+      document.getElementById("radar"),
+      report.radar_data || {},
+      report.radar_region_data || {},
+      ["本校六维得分", (o.short_name || o.region_name || "全区") + "均分"]
+    );
+
+    document.querySelectorAll(".btnPeerEval").forEach(b => {
+      b.onclick = () => {
+        document.getElementById("question").value = b.dataset.name + " " + b.dataset.year + " 数字化水平怎么样？";
+        document.getElementById("btnAsk").click();
+      };
+    });
+    const bFact = document.getElementById("btnRankToFact");
+    if (bFact) {
+      bFact.onclick = () => {
+        document.getElementById("question").value = bFact.dataset.name + " 给老师配置了多少台平板电脑？";
+        document.getElementById("btnAsk").click();
+      };
+    }
+    const bReg = document.getElementById("btnRankToRegion");
+    if (bReg) {
+      bReg.onclick = () => {
+        document.getElementById("question").value = bReg.dataset.region + " " + bReg.dataset.year + " 数字化大盘怎么样？";
+        document.getElementById("btnAsk").click();
+      };
+    }
+    const bWhole = document.getElementById("btnRankToWholeSchool");
+    if (bWhole) {
+      bWhole.onclick = () => {
+        document.getElementById("question").value = bWhole.dataset.name + " " + bWhole.dataset.year + " 数字化水平怎么样？";
+        document.getElementById("btnAsk").click();
+      };
+    }
+    return;
+  }
+
+  // 分支 2：区域宏观数字化大盘卡片
+  if (objType === "region") {
+    let html = '<div class="card">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">';
+    html += '<span style="background:var(--primary-light);color:var(--primary);font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">区域数字化大盘</span>';
+    html += '<span style="font-size:13px;color:var(--text-muted);">监测学年：' + esc((o.school_years || []).join(", ")) + '</span>';
+    html += '</div>';
+    html += '<h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">' + esc(o.region_name) + ' · 数字化发展大盘</h2>';
+
+    html += '<div class="statGrid">'
+      + '<div class="stat"><div class="v">' + (o.total_score ?? "-") + '</div><div class="l">区域综合均分</div></div>'
+      + '<div class="stat"><div class="v">' + (o.school_count ?? "-") + '</div><div class="l">监测学校总数</div></div>'
+      + '<div class="stat"><div class="v" style="font-size:18px;">' + (o.max_score ?? "-") + ' / ' + (o.min_score ?? "-") + '</div><div class="l">最高/最低分</div></div>'
+      + '<div class="stat"><div class="v" style="font-size:14px;color:var(--ok);">' + esc(o.strongest_dim || "-") + '</div><div class="l">相对优势维度</div></div>'
+      + '<div class="stat"><div class="v" style="font-size:14px;color:var(--warn);">' + esc(o.weakest_dim || "-") + '</div><div class="l">主要瓶颈短板</div></div>'
+      + '</div>';
+
+    if (o.conclusion) {
+      html += '<div class="section" style="background:#fbfaf7;border-left:3px solid var(--accent);">';
+      html += '<h3 style="margin:0 0 6px;color:var(--accent);">区域宏观诊断结论</h3>';
+      html += '<div style="font-size:14.5px;line-height:1.65;">' + esc(o.conclusion) + '</div>';
+      html += '</div>';
+    }
+
+    html += '<div id="radar"></div>';
+
+    // 梯队分层结构
+    const tiers = report.tiers || [];
+    if (tiers.length) {
+      html += '<div class="section">';
+      html += '<h3 style="margin-top:0;">区域学校发展梯队结构</h3>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-top:10px;">';
+      tiers.forEach(t => {
+        html += '<div style="background:#ffffff;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 14px;">';
+        html += '<div style="font-size:12px;color:var(--text-muted);">' + esc(t.tier) + '</div>';
+        html += '<div style="font-size:18px;font-weight:600;color:var(--text-main);margin-top:2px;">' + t.count + ' 所 <span style="font-size:13px;font-weight:normal;color:var(--text-light);">(' + t.pct + ')</span></div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // 标杆示范学校 Top 5
+    const topSchools = report.top_schools || [];
+    if (topSchools.length) {
+      html += '<div class="section">';
+      html += '<h3 style="margin-top:0;">标杆示范学校 (Top 5)</h3>';
+      html += '<table><tr><th>名次</th><th>学校名称</th><th>学段</th><th>数字化均分</th><th>操作</th></tr>';
+      topSchools.forEach(s => {
+        html += '<tr><td><b>' + s.rank + '</b></td><td><b>' + esc(s.school_name) + '</b></td><td>' + esc(s.school_type) + '</td><td><span style="color:var(--primary);font-weight:600;">' + s.score + ' 分</span></td>';
+        html += '<td><button class="ghost btnTopSchoolEval" data-name="' + esc(s.school_name) + '" data-year="' + esc((o.school_years||[])[0]||'') + '">深入评估</button></td></tr>';
+      });
+      html += '</table></div>';
+    }
+
+    // 模型解读
+    html += renderLlmSection(report, "智能区域宏观诊断与建议");
+
+    html += renderAgentVisuals(report);
+    html += '<div class="banner disclaimer">' + esc(report.disclaimer || "本报告由区域全量中小学数字化作答数据统计聚合生成，仅供教育行政主管部门决策参考。") + '</div>';
+    html += '</div>';
+    into.innerHTML = html;
+    bindRetryLlm(report, into);
+    radarChart(document.getElementById("radar"), report.radar_data || {});
+    document.querySelectorAll(".btnTopSchoolEval").forEach(b => {
+      b.onclick = () => {
+        document.getElementById("question").value = b.dataset.name + " " + b.dataset.year + " 数字化水平怎么样？";
+        document.getElementById("btnAsk").click();
+      };
+    });
+    return;
+  }
+
+  // 分支 3：教师 / 学校综合评估报告（保留原有能力）
+  const name = o.school_name || o.teacher_id || "";
+  const teacherAlias = o.teacher_id && TEACHER_NAME_MAP[o.teacher_id] ? `（${TEACHER_NAME_MAP[o.teacher_id]}·模拟）` : "";
+  let html = '<div class="card">';
+  if (o.redline_flagged) html += '<div class="banner red">红线标记已触发：本报告总分不参与评分，请转独立人事流程。</div>';
+  if ((o.data_coverage ?? 1) < 0.6) html += '<div class="banner warn">数据覆盖不足（' + o.data_coverage + '），以下结论仅供参考。</div>';
+  html += '<div class="row"><b>' + (o.teacher_id ? '教师 ' : '') + esc(name) + esc(teacherAlias) + "（" + esc(o.teacher_dept||"") + "）</b>";
+  html += "<span>评估学年：" + esc((o.school_years||[]).join(", ")) + "</span><span>" + esc(o.template||"") + "</span></div>";
+  html += '<div class="statGrid">'
+    + '<div class="stat"><div class="v">' + (o.total_score??"-") + '</div><div class="l">综合得分</div></div>'
+    + '<div class="stat"><div class="v">' + (o.data_coverage??"-") + '</div><div class="l">数据覆盖率</div></div>'
+    + '<div class="stat"><div class="v">' + (o.overall_confidence??"-") + '</div><div class="l">综合置信度</div></div>'
+    + "</div>";
+  html += '<div id="radar"></div>';
+  const sections = report.sections || report.dimensions || [];
+  sections.forEach(s => {
+    if (s.is_redline) {
+      html += '<div class="section"><h3>' + esc(s.dimension||"红线") + '</h3><span class="redline">' + esc(s.conclusion || (s.flagged ? "已触发红线" : "未触发")) + "</span>";
+    } else {
+      html += '<div class="section"><h3>' + esc(s.dimension||"") + "</h3><div>" + esc(s.conclusion||"") + "</div>";
+    }
+    (s.evidence_refs||s.evidence||[]).forEach(e => {
+      const txt = formatEvidenceText(e);
+      html += '<div class="ev">' + esc(txt) + "</div>";
+    });
+    (s.gaps||s.gap||[]).forEach(g => html += '<div class="gap">缺口：' + esc(g) + "</div>");
+    html += "</div>";
+  });
+    html += renderAgentVisuals(report);
+  html += renderLlmSection(report, "智能综合诊断与建议");
+  html += "</div>";
+  into.innerHTML = html;
+  bindRetryLlm(report, into);
+  radarChart(document.getElementById("radar"), radardata(report));
+}
+
+function radardata(report) {
+  const d = {};
+  (report.sections||report.dimensions||[]).forEach(s => { if (s.score != null && !s.is_redline) d[s.dimension] = s.score; });
+  return d;
+}
+
+function kvTable(obj) {
+  let html = "<table><tr><th>指标项</th><th>采集数值</th></tr>";
+  Object.entries(obj||{}).forEach(([k,v]) => {
+    if (v && typeof v === "object") v = JSON.stringify(v);
+    const label = FIELD_MAP[k] || k;
+    html += "<tr><td><b>" + esc(label) + "</b> <span style='font-size:11px;color:var(--text-light)'>(" + esc(k) + ")</span></td><td>" + esc(v == null || v === "" ? "-" : v) + "</td></tr>";
+  });
+  return html + "</table>";
+}
+
+let currentSessionId = "sess-" + Math.random().toString(36).substring(2, 10);
+
+async function ask(question) {
+  document.getElementById("loading").style.display = "block";
+  try {
+    const resp = await fetch(apiUrl("/api/v1/chat"), {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({question, session_id: currentSessionId})
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.session_id) currentSessionId = data.session_id;
+      if (data.clarify) return { clarify:true, next_prompt:data.next_prompt, report:null };
+      const report = data.report || data.result || {};
+      report._question = question;
+      report.markdown = data.markdown || report.markdown || "";
+      if (data.llm && data.llm.text) report._llmText = data.llm.text;
+      else if (data.llm && data.llm.error) report._llmText = "模型未调用：" + data.llm.error;
+      if (data.charts && !report.charts) report.charts = data.charts;
+      if (data.tool_calls && !report.tool_calls) report.tool_calls = data.tool_calls;
+      return { report };
+    }
+  } catch (e) { /* 无后端 → mock */ }
+  const m = question.match(/T0\d+/);
+  const tid = m ? m[0] : "T001";
+  return { report: MOCK[tid] || MOCK.T001 };
+}
+
+function showTab(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  ["chat","profile","api"].forEach(id => {
+    const el = document.getElementById("tab-" + id);
+    if (el) el.style.display = id === name ? "" : "none";
+  });
+}
+
+document.querySelectorAll(".tab").forEach(el => el.addEventListener("click", () => showTab(el.dataset.tab)));
+
+document.getElementById("btnAsk").addEventListener("click", async () => {
+  const q = document.getElementById("question").value.trim();
+  if (!q) return;
+  const out = await ask(q);
+  document.getElementById("loading").style.display = "none";
+  const box = document.getElementById("chatResult");
+  if (out.clarify) box.innerHTML = '<div class="card"><div class="banner warn">需补充澄清：' + esc(out.next_prompt) + "</div></div>";
+  else renderReport(out.report, box);
+});
+
+document.getElementById("question").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("btnAsk").click();
+  }
+});
+
+function fillTeacherSelects(rows) {
+  const list = rows && rows.length ? rows : MOCK_TEACHERS;
+  ["profileTeacher"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = "";
+    list.forEach(t => {
+      const o = document.createElement("option");
+      o.value = t.teacher_id;
+      const cname = t.name || TEACHER_NAME_MAP[t.teacher_id] || "模拟教师";
+      const title = t.title_desc || TEACHER_TITLE_MAP[t.title] || t.title || "教师";
+      o.textContent = `${t.teacher_id}（${cname}）· ${t.dept_id||"任课组"} · ${title}`;
+      sel.appendChild(o);
+    });
+  });
+}
+
+function renderTeacherProfile(p) {
+  const cov = p.coverage || {};
+  const cname = p.name || TEACHER_NAME_MAP[p.teacher_id] || "模拟教师";
+  const titleDesc = p.title_desc || TEACHER_TITLE_MAP[p.title] || p.title || "-";
+  let html = '<div class="card">';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">';
+  html += '<span style="background:var(--primary-light);color:var(--primary);font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">示例教师档案</span>';
+  html += '<span style="font-size:13px;color:var(--text-muted);">档案编号：' + esc(p.teacher_id) + '</span>';
+  html += '</div>';
+  html += '<h2 style="margin:0 0 16px;font-size:20px;font-weight:600;">' + esc(p.teacher_id) + '（' + esc(cname) + '） · 教师业务与档案概况</h2>';
+  html += '<div class="statGrid">'
+    + '<div class="stat"><div class="v">' + esc(p.dept_id||"-") + '</div><div class="l">任教教研组</div></div>'
+    + '<div class="stat"><div class="v" style="font-size:15px;">' + esc(titleDesc) + '</div><div class="l">专业技术职称</div></div>'
+    + '<div class="stat"><div class="v">' + esc(p.hire_year ? p.hire_year + " 年" : "-") + '</div><div class="l">参加工作年份</div></div>'
+    + '<div class="stat"><div class="v" style="font-size:15px;">' + esc((p.years||[]).join(" / ") || "-") + '</div><div class="l">建档任教学年</div></div>'
+    + "</div>";
+
+  html += '<div class="section"><h3 style="margin-top:0;">考核依据业务数据源采集统计</h3>';
+  html += "<table><tr><th>业务数据源</th><th>考核内容与口径</th><th>采集条数</th></tr>";
+  Object.entries(cov).forEach(([k,v]) => {
+    const meta = TEACHER_SOURCE_DESC_MAP[k] || { name: DATA_SOURCE_MAP[k] || k, desc: "教师业务考核关联数据" };
+    html += "<tr><td><b>" + esc(meta.name) + "</b></td><td style='color:var(--text-muted);font-size:12.5px;'>" + esc(meta.desc) + "</td><td><b style='color:var(--primary);'>" + esc(v) + "</b> 条</td></tr>";
+  });
+  html += "</table></div>";
+  html += '<div class="banner disclaimer">' + esc(p.note || "演示数据为脱敏虚构档案；真实学校数字化数据请走学校简介。") + "</div>";
+  html += '<div style="margin-top:16px;display:flex;gap:10px;">';
+  html += '<button id="btnEvalFromProfile">立即评估该教师教学水平 (' + esc(p.teacher_id) + ')</button>';
+  html += '</div></div>';
+  document.getElementById("profileResult").innerHTML = html;
+  document.getElementById("btnEvalFromProfile").onclick = () => {
+    document.getElementById("question").value = p.teacher_id + " 2024-2025 教学水平怎么样？";
+    showTab("chat");
+    document.getElementById("btnAsk").click();
+  };
+}
+
+function renderSchoolHits(schools) {
+  let html = '<div class="card"><h3>检索结果（' + schools.length + "）</h3>";
+  if (!schools.length) { html += '<div class="banner warn">未找到匹配学校</div></div>'; document.getElementById("profileResult").innerHTML = html; return; }
+  html += "<table><tr><th>id</th><th>校名</th><th>地区</th><th>年份</th><th>学段</th><th></th></tr>";
+  schools.forEach(s => {
+    html += '<tr class="clickable" data-sid="' + s.id + '"><td>' + s.id + "</td><td>" + esc(s.school_name)
+      + "</td><td>" + esc((s.province||"")+"/"+ (s.city||"")) + "</td><td>" + esc(s.year)
+      + "</td><td>" + esc(s.school_type) + '</td><td><button class="ghost btnSchoolProfile" data-sid="' + s.id + '">简介</button> '
+      + '<button class="btnSchoolEval" data-sid="' + s.id + '" data-name="' + esc(s.school_name) + '" data-year="' + esc(s.year) + '">评估</button></td></tr>';
+  });
+  html += "</table></div>";
+  document.getElementById("profileResult").innerHTML = html;
+  document.querySelectorAll(".btnSchoolProfile").forEach(b => b.addEventListener("click", () => loadSchoolProfile(b.dataset.sid)));
+  document.querySelectorAll(".btnSchoolEval").forEach(b => b.addEventListener("click", () => {
+    document.getElementById("question").value = b.dataset.name + " " + b.dataset.year + " 数字化水平怎么样？";
+    showTab("chat");
+    document.getElementById("btnAsk").click();
+  }));
+}
+
+async function loadSchoolProfile(id) {
+  const box = document.getElementById("profileResult");
+  try {
+    const resp = await fetch(apiUrl("/api/v1/schools/" + id + "/profile"));
+    if (!resp.ok) throw new Error(await resp.text());
+    const p = await resp.json();
+    let html = '<div class="card"><h3>学校简介 · ' + esc(p.school_name) + "（id=" + p.id + "）</h3>";
+    html += '<div class="statGrid">'
+      + '<div class="stat"><div class="v">' + esc(p.year) + '</div><div class="l">年份</div></div>'
+      + '<div class="stat"><div class="v">' + esc((p.answered??"-") + "/" + (p.total_questions??"-")) + '</div><div class="l">作答题数</div></div>'
+      + '<div class="stat"><div class="v">' + esc(p.school_type||"-") + '</div><div class="l">学段</div></div>'
+      + '<div class="stat"><div class="v">' + esc(p.region||"-") + '</div><div class="l">区域</div></div>'
+      + "</div>";
+    html += kvTable({
+      province:p.province, city:p.city, district:p.district,
+      school_area_type:p.school_area_type, class_num:p.class_num,
+      teacher_num:p.teacher_num, student_num:p.student_num,
+      same_name_years:(p.same_name_years||[]).join(", ")
+    });
+    html += '<div class="banner disclaimer">' + esc(p.note||"") + "</div>";
+    html += '<button id="btnEvalSchool">评估该校</button></div>';
+    box.innerHTML = html;
+    document.getElementById("btnEvalSchool").onclick = () => {
+      document.getElementById("question").value = p.school_name + " " + p.year + " 数字化水平怎么样？";
+      showTab("chat");
+      document.getElementById("btnAsk").click();
+    };
+  } catch (e) {
+    box.innerHTML = '<div class="card"><div class="banner warn">简介加载失败：' + esc(e.message||e) + "。请先在「接口配置」探测 API。</div></div>";
+  }
+}
+
+document.getElementById("btnTeacherProfile").addEventListener("click", async () => {
+  const tid = document.getElementById("profileTeacher").value;
+  try {
+    const resp = await fetch(apiUrl("/api/v1/teachers/" + tid + "/profile"));
+    if (resp.ok) { renderTeacherProfile(await resp.json()); return; }
+  } catch (e) {}
+  const t = MOCK_TEACHERS.find(x => x.teacher_id === tid) || MOCK_TEACHERS[0];
+  renderTeacherProfile({
+    ...t,
+    years: ["2023-2024", "2024-2025"],
+    coverage: {
+      course_period: 240,
+      lesson_plan: 18,
+      class_observation: 6,
+      exam_score: 120,
+      research_record: 3,
+      student_survey: 60,
+      complaint_record: 0,
+      discipline_record: 0
+    },
+    note: "当前为脱敏演示简介（本地离线展示模式）。"
+  });
+});
+
+document.getElementById("btnSchoolSearch").addEventListener("click", async () => {
+  const q = document.getElementById("schoolQ").value.trim();
+  const year = document.getElementById("schoolYear").value.trim();
+  const box = document.getElementById("profileResult");
+  if (!q) { box.innerHTML = '<div class="card"><div class="banner warn">请输入学校名关键词</div></div>'; return; }
+  try {
+    const url = apiUrl("/api/v1/schools?q=" + encodeURIComponent(q) + (year ? "&year=" + encodeURIComponent(year) : ""));
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
+    renderSchoolHits(data.schools || []);
+  } catch (e) {
+    box.innerHTML = '<div class="card"><div class="banner warn">检索失败：' + esc(e.message||e) + "。请先在「接口配置」保存并探测。</div></div>";
+  }
+});
+
+const LLM_PRESET = {
+  deepseek: { base:"https://api.deepseek.com/v1", model:"deepseek-chat" },
+  qwen: { base:"https://dashscope.aliyuncs.com/compatible-mode/v1", model:"qwen-plus" },
+  kimi: { base:"https://api.moonshot.cn/v1", model:"moonshot-v1-8k" },
+  openai: { base:"https://api.openai.com/v1", model:"gpt-4o-mini" },
+  custom: { base:"", model:"" }
+};
+
+let savedProfiles = [];
+function fillProfileSelect(profiles, active) {
+  const sel = document.getElementById("llmProfileSel");
+  sel.innerHTML = "";
+  savedProfiles = profiles || [];
+  if (!savedProfiles.length) {
+    const o = document.createElement("option");
+    o.value = ""; o.textContent = "尚无已保存配置";
+    sel.appendChild(o);
+    return;
+  }
+  savedProfiles.forEach(p => {
+    const o = document.createElement("option");
+    o.value = p.id;
+    o.textContent = (p.name || "未命名") + " · " + (p.model || "-") + " · " + (p.api_key_masked || "无Key");
+    if (p.id === active) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+function applyProfileFields(p) {
+  if (!p) return;
+  if (p.provider) document.getElementById("llmProvider").value = p.provider;
+  if (p.api_base) document.getElementById("llmBase").value = p.api_base;
+  if (p.name) document.getElementById("llmProfileName").value = p.name;
+  if (p.model) {
+    document.getElementById("llmModel").value = p.model;
+    fillModelSelect([p.model], p.model);
+  }
+  fillKeyField(p.api_key || "", p.api_key_masked || "");
+}
+
+let lastKnownKey = "";
+function currentKey() {
+  const typed = cleanKey(document.getElementById("llmKey").value);
+  if (typed) { lastKnownKey = typed; return typed; }
+  return lastKnownKey;
+}
+function fillKeyField(key, masked) {
+  const el = document.getElementById("llmKey");
+  if (key) {
+    lastKnownKey = key;
+    el.value = key;
+    el.placeholder = "已保存 " + (masked || "密钥") + "，可直接使用";
+  } else if (masked) {
+    el.placeholder = "已保存 " + masked + "，留空则继续使用";
+  } else {
+    el.placeholder = "API Key（sk-... 或中转密钥）";
+  }
+}
+
+function renderLlmStatus(st) {
+  const status = document.getElementById("apiStatus");
+  const dot = document.getElementById("apiDot");
+  if (!st || st.error) {
+    dot.textContent = "模型：未配置";
+    dot.classList.remove("on");
+    status.innerHTML = '<div class="banner warn">无法读取模型配置。请确认 exe 已启动服务。</div>';
+    return;
+  }
+  fillProfileSelect(st.profiles, st.active || st.id);
+  if (st.configured) {
+    dot.textContent = "模型：" + (st.name || st.provider || "已配置") + " " + (st.api_key_masked || "");
+    dot.classList.add("on");
+    status.innerHTML = '<div class="banner ok">当前配置：' + esc(st.name || "未命名")
+      + " · " + esc(st.provider||"-") + " · " + esc(st.model||"-") + " · Key " + esc(st.api_key_masked||"(环境变量)")
+      + "</div><div class='mockNote'>共 " + ((st.profiles||[]).length) + " 套，保存在 " + esc(st.config_path||"") + "。密钥框变空不代表已删除。</div>";
+  } else {
+    dot.textContent = "模型：未配置密钥";
+    dot.classList.remove("on");
+    status.innerHTML = '<div class="banner warn">尚未填写 API Key。评估仍可出分（本地规则引擎）；配好密钥后才会生成文字解读。</div>';
+  }
+  applyProfileFields(st);
+}
+
+function fillModelSelect(models, current) {
+  const sel = document.getElementById("llmModelSel");
+  const cur = current || document.getElementById("llmModel").value.trim();
+  const list = Array.from(new Set((models||[]).filter(Boolean)));
+  if (cur && list.indexOf(cur) < 0) list.unshift(cur);
+  sel.innerHTML = "";
+  if (!list.length) {
+    const o = document.createElement("option");
+    o.value = ""; o.textContent = "未识别到模型，可手动填写";
+    sel.appendChild(o);
+    return;
+  }
+  list.forEach(id => {
+    const o = document.createElement("option");
+    o.value = id; o.textContent = id;
+    if (id === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+  document.getElementById("llmModel").value = sel.value || cur || "";
+}
+
+async function loadLlmStatus() {
+  try {
+    const resp = await fetch(apiUrl("/api/v1/llm/status"));
+    if (resp.ok) { renderLlmStatus(await resp.json()); return; }
+  } catch (e) {}
+  try {
+    const h = await fetch(apiUrl("/health"));
+    if (h.ok) { const d = await h.json(); if (d.llm) { renderLlmStatus(d.llm); return; } }
+  } catch (e) {}
+  renderLlmStatus({ configured:false, error:"offline" });
+}
+
+document.getElementById("llmProvider").addEventListener("change", () => {
+  const p = LLM_PRESET[document.getElementById("llmProvider").value] || LLM_PRESET.custom;
+  if (p.base) document.getElementById("llmBase").value = p.base;
+  if (p.model) document.getElementById("llmModel").value = p.model;
+});
+
+function cleanKey(s) {
+  return String(s||"").replace(/[\ufeff\u200b\u200c\u200d\xa0]/g, "").trim().replace(/^Bearer\s+/i, "").replace(/^["']|["']$/g, "").replace(/\s+/g, "");
+}
+function cleanBase(s) {
+  s = String(s||"").trim().replace(/\\/g, "/").replace(/\/+$/, "");
+  s = s.replace(/\/chat\/completions$/i, "").replace(/\/completions$/i, "");
+  if (s && !/^https?:\/\//i.test(s)) s = "https://" + s;
+  return s;
+}
+
+document.getElementById("llmModelSel").addEventListener("change", () => {
+  document.getElementById("llmModel").value = document.getElementById("llmModelSel").value;
+});
+
+async function ensureLocalApi() {
+  const probe = apiUrl("/health");
+  try {
+    const h = await fetch(probe, { cache: "no-store" });
+    if (!h.ok) throw new Error("本机健康检查 HTTP " + h.status);
+    return true;
+  } catch (e) {
+    throw new Error("本机程序未接通（请求 " + probe + "）。请用 TeacherEval.exe 打开的 127.0.0.1 页面，不要直接打开 html 文件。");
+  }
+}
+
+document.getElementById("btnDiscoverModels").addEventListener("click", async () => {
+  const status = document.getElementById("apiStatus");
+  const body = {
+    provider: document.getElementById("llmProvider").value,
+    api_base: cleanBase(document.getElementById("llmBase").value),
+    api_key: currentKey(),
+    save: false
+  };
+  if (!body.api_base && !document.getElementById("llmBase").value) {
+    status.innerHTML = '<div class="banner warn">请先填写官方或中转站 API 地址</div>';
+    return;
+  }
+  status.innerHTML = '<div class="banner">正在用地址和密钥拉取模型列表…</div>';
+  try {
+    await ensureLocalApi();
+    const resp = await fetch(apiUrl("/api/v1/llm/models"), {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
+    });
+    const data = await resp.json();
+    if (!data.ok) {
+      status.innerHTML = '<div class="banner warn">识别失败：' + esc(data.error||"未知错误")
+        + (data.url ? "<br>请求 " + esc(data.url) : "")
+        + (data.tried && data.tried.length ? "<br>已尝试：" + esc(data.tried.join(" 、 ")) : "")
+        + (data.api_key_masked ? "<br>已识别 Key：" + esc(data.api_key_masked) : "")
+        + "</div>";
+      return;
+    }
+    fillModelSelect(data.models, data.current);
+    if (body.api_key) fillKeyField(body.api_key, data.api_key_masked);
+    status.innerHTML = '<div class="banner ok">识别到 ' + (data.count||0) + " 个模型，请在下拉框中选择。密钥仍保留在输入框。"
+      + (data.api_key_masked ? " Key " + esc(data.api_key_masked) : "")
+      + "</div>";
+  } catch (e) {
+    status.innerHTML = '<div class="banner warn">识别失败：' + esc(fetchErrorHint(e)) + "</div>";
+  }
+});
+
+async function saveProfile(overwrite) {
+  const name = document.getElementById("llmProfileName").value.trim();
+  const selectedId = document.getElementById("llmProfileSel").value || "";
+  const body = {
+    provider: document.getElementById("llmProvider").value,
+    api_base: cleanBase(document.getElementById("llmBase").value),
+    api_key: currentKey(),
+    model: (document.getElementById("llmModelSel").value || document.getElementById("llmModel").value).trim(),
+    name: name,
+    overwrite: !!overwrite,
+    id: overwrite ? selectedId : ""
+  };
+  if (!body.name) { document.getElementById("apiStatus").innerHTML = '<div class="banner warn">请填写配置名称后再保存（例如：官方DeepSeek）</div>'; return; }
+  if (!body.api_base) { document.getElementById("apiStatus").innerHTML = '<div class="banner warn">请填写官方或中转站 API 地址（例如 https://api.deepseek.com/v1），不是本机端口</div>'; return; }
+  if (overwrite && !selectedId) { document.getElementById("apiStatus").innerHTML = '<div class="banner warn">没有选中要覆盖的配置。请用「另存为新配置」，或先在下拉框选一套。</div>'; return; }
+  if (!body.api_key && !overwrite) {
+    // 同名更新可沿用该名称下已有 Key；全新名称必须贴 Key
+    const exists = Array.from(document.getElementById("llmProfileSel").options).some(o => o.textContent.indexOf(body.name + " ·") === 0 || o.textContent.startsWith(body.name + " ·"));
+    if (!exists) { document.getElementById("apiStatus").innerHTML = '<div class="banner warn">新建配置必须粘贴 API Key</div>'; return; }
+  }
+  try {
+    const resp = await fetch(apiUrl("/api/v1/llm/config"), {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
+    });
+    const data = await resp.json();
+    renderLlmStatus(data);
+    if (body.api_key) fillKeyField(body.api_key, data.api_key_masked);
+    const names = (data.profiles||[]).map(p => p.name).join("、") || data.name;
+    if (data.configured) {
+      document.getElementById("apiStatus").innerHTML += '<div class="banner ok">'
+        + (overwrite ? "已覆盖当前配置「" : "已保存「") + esc(data.name||body.name) + "」。"
+        + "现有 " + ((data.profiles||[]).length) + " 套：" + esc(names) + "</div>";
+    } else {
+      document.getElementById("apiStatus").innerHTML = '<div class="banner warn">保存后仍未识别到密钥。请确认 Key 不是空、地址以 http 开头。</div>';
+    }
+  } catch (e) {
+    document.getElementById("apiStatus").innerHTML = '<div class="banner warn">保存失败：' + esc(fetchErrorHint(e)) + "</div>";
+  }
+}
+
+document.getElementById("btnSaveLlm").addEventListener("click", () => saveProfile(false));
+document.getElementById("btnOverwriteLlm").addEventListener("click", () => saveProfile(true));
+
+document.getElementById("btnPingLlm").addEventListener("click", async () => {
+  const status = document.getElementById("apiStatus");
+  status.innerHTML = '<div class="banner">正在探测官方/中转接口…</div>';
+  try {
+    const resp = await fetch(apiUrl("/api/v1/llm/ping"), { method:"POST" });
+    const data = await resp.json();
+    if (data.ok) status.innerHTML = '<div class="banner ok">连通成功 · ' + esc(data.provider) + " / " + esc(data.model)
+      + "<br>请求 " + esc(data.chat_url||data.api_base||"") + " · Key " + esc(data.api_key_masked||"")
+      + " · 回复 " + esc(data.reply||"") + "</div>";
+    else status.innerHTML = '<div class="banner warn">探测失败：' + esc(data.error||"未知错误")
+      + (data.chat_url ? "<br>实际请求：" + esc(data.chat_url) : "")
+      + (data.api_key_masked ? "<br>已识别 Key：" + esc(data.api_key_masked) : "")
+      + "</div>";
+  } catch (e) {
+    status.innerHTML = '<div class="banner warn">探测失败：' + esc(fetchErrorHint(e)) + "</div>";
+  }
+});
+
+document.getElementById("llmProfileSel").addEventListener("change", () => {
+  const id = document.getElementById("llmProfileSel").value;
+  const p = savedProfiles.find(x => x.id === id);
+  applyProfileFields(p);
+});
+
+document.getElementById("btnLoadProfile").addEventListener("click", async () => {
+  const id = document.getElementById("llmProfileSel").value;
+  if (!id) return;
+  try {
+    const resp = await fetch(apiUrl("/api/v1/llm/profiles/activate"), {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({id})
+    });
+    const data = await resp.json();
+    renderLlmStatus(data);
+    document.getElementById("apiStatus").innerHTML += '<div class="banner ok">已切换到「' + esc(data.name||id) + '」</div>';
+  } catch (e) {
+    document.getElementById("apiStatus").innerHTML = '<div class="banner warn">切换失败：' + esc(e.message||e) + "</div>";
+  }
+});
+
+document.getElementById("btnDeleteProfile").addEventListener("click", async () => {
+  const id = document.getElementById("llmProfileSel").value;
+  if (!id) return;
+  if (!confirm("删除这套已保存的 API 配置？")) return;
+  try {
+    const resp = await fetch(apiUrl("/api/v1/llm/profiles/delete"), {
+      method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({id})
+    });
+    renderLlmStatus(await resp.json());
+  } catch (e) {}
+});
+
+async function probeLocal() {
+  try {
+    const resp = await fetch(apiUrl("/health"));
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const dbDot = document.getElementById("dbDot");
+    if (dbDot && data.db_stats) {
+      if (data.db_stats.ready) {
+        dbDot.textContent = "学校库：37.5万所 (3111.56万作答在线)";
+        dbDot.classList.add("on");
+      } else {
+        dbDot.textContent = "学校库：异常";
+        dbDot.classList.remove("on");
+      }
+    }
+    if (data.teachers && data.teachers.length) {
+      try {
+        const t = await fetch(apiUrl("/api/v1/teachers"));
+        if (t.ok) { const j = await t.json(); fillTeacherSelects(j.teachers || []); }
+      } catch (e) { fillTeacherSelects(data.teachers.map(id => ({teacher_id:id, dept_id:"", title:""}))); }
+    }
+    if (data.llm) renderLlmStatus(data.llm);
+  } catch (e) {}
+}
+
+fillTeacherSelects(MOCK_TEACHERS);
+probeLocal();
+loadLlmStatus();
+</script>
+</body>
+</html>
