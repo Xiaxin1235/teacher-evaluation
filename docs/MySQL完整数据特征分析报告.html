@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="1TezEhP0PRY3mUId3Sa8N5">
+<head data-page-node-id="HgHl84p7LU0mwBBG3RNe5v">
+<meta charset="UTF-8" data-page-node-id="Ec2HqI72de6Nw9YaGlpbGC">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="OG3ZTNHbbTEyZWzB1RPDPh">
+<title>MySQL 完整数据 · 数据特征分析报告</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--line:#e4e7ec;--text:#1f2328;--muted:#6b7280;
+--accent:#2563eb;--red:#dc2626;--orange:#ea580c;--green:#16a34a;--purple:#7c3aed}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+line-height:1.65;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 24px 80px}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:14px;padding:34px 36px;margin-bottom:26px}
+header h1{margin:0 0 8px;font-size:27px}
+header .sub{opacity:.9;font-size:13.5px}
+header .kv{display:flex;flex-wrap:wrap;gap:26px;margin-top:20px}
+header .kv div{font-size:12.5px;opacity:.85}
+header .kv b{display:block;font-size:20px;opacity:1;margin-top:2px;font-weight:600}
+h2{font-size:19px;margin:38px 0 14px;padding-left:11px;border-left:4px solid var(--accent)}
+h3{font-size:15px;margin:22px 0 10px;color:#374151}
+.card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:20px 22px;margin-bottom:16px}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.g4,.g3,.g2{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.g4,.g3,.g2{grid-template-columns:1fr}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
+.kpi .lbl{font-size:12px;color:var(--muted)}
+.kpi .val{font-size:24px;font-weight:650;margin-top:4px}
+.kpi .note{font-size:11.5px;color:var(--muted);margin-top:3px}
+.kpi.danger{border-left:4px solid var(--red)}.kpi.warn{border-left:4px solid var(--orange)}.kpi.ok{border-left:4px solid var(--green)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{background:#f3f4f6;font-weight:600;color:#374151;font-size:12.5px;white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:#fafbfc}
+.tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.t-red{background:#fee2e2;color:#b91c1c}.t-org{background:#ffedd5;color:#c2410c}
+.t-grn{background:#dcfce7;color:#15803d}.t-blu{background:#dbeafe;color:#1d4ed8}.t-gry{background:#f3f4f6;color:#4b5563}
+.bar{height:9px;background:#eef0f3;border-radius:5px;overflow:hidden;min-width:70px}
+.bar>i{display:block;height:100%;border-radius:5px;background:var(--accent)}
+.bar.r>i{background:var(--red)}.bar.o>i{background:var(--orange)}.bar.g>i{background:var(--green)}.bar.p>i{background:var(--purple)}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px;padding:10px 13px;background:#f8fafc;border-left:3px solid var(--accent);border-radius:0 6px 6px 0}
+.warnbox{background:#fffbeb;border:1px solid #fde68a;border-left:4px solid var(--orange);border-radius:0 8px 8px 0;padding:13px 16px;margin:12px 0;font-size:13px}
+.critbox{background:#fef2f2;border:1px solid #fecaca;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:13px 16px;margin:12px 0;font-size:13px}
+code{background:#f1f3f5;padding:1px 5px;border-radius:4px;font-size:12.5px;font-family:"SFMono-Regular",Consolas,monospace}
+.tree,.code{font-family:"SFMono-Regular",Consolas,monospace;font-size:12.5px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;line-height:1.9;overflow-x:auto}
+footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);text-align:center}
+.split{display:flex;gap:14px;align-items:center}
+.bigbar{flex:1;background:#eef0f3;border-radius:7px;height:34px;overflow:hidden;display:flex}
+.bigbar>div{height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
+</style>
+</head>
+<body data-page-node-id="dGL8xiunesDNCCoTpMxJVs">
+<div class="wrap" data-page-node-id="uqtGKhAO0REnD9Q657Fou6">
+
+<header data-page-node-id="bYZVBu9IrnMNUFuk2kohoU">
+  <h1 data-page-node-id="IQpQEMobIeUE8rZmWpXRmA">MySQL 完整数据 · 数据特征分析报告</h1>
+  <div class="sub" data-page-node-id="acCNgzpkCQxOCSUCyvAbq5">两份 MySQL dump（<code style="background:rgba(255,255,255,.18);color:#fff" data-page-node-id="mi1JToBPAdgkxbR4ZKYDV6">test_number</code> + <code style="background:rgba(255,255,255,.18);color:#fff" data-page-node-id="XeVbcymlckYiYonQRter9V">regional</code>）· 全量流式解析 31,115,621 行</div>
+  <div class="kv" data-page-node-id="IqAQefVIW80LeSMguocAeu">
+    <div data-page-node-id="sclPupnPVcd1kvDawx6M2x">文件合计<b data-page-node-id="JY6rSyvrvC47VqHowOUoin">1,721 MB</b></div>
+    <div data-page-node-id="pbcSKr6ylD5zEIzYI8XkeC">表数量<b data-page-node-id="u8uIg5V4BsrLqjCaJdQem8">5</b></div>
+    <div data-page-node-id="Ae8Qfn8NtZJLUuBqb2wkEh">总记录<b data-page-node-id="PFz6OkhbPSbeRs31ZjFsFW">31,865,561</b></div>
+    <div data-page-node-id="QkHCzC68bpFZNy5DQj8ciy">有效作答<b data-page-node-id="kSybvj9vtQhlHfJon1hIDE">16,301,215</b></div>
+    <div data-page-node-id="YdyiU7ziJxFE8EpjiogrkC">每校中位题数<b data-page-node-id="mi7fkpB5WM0xkE5EuTBVlJ">44</b></div>
+  </div>
+</header>
+
+<h2 data-page-node-id="7TEX2mVIuK2KXDjSF5wYIc">核心结论</h2>
+<div class="card" data-page-node-id="gjan1TOLPr1JnYWamyyhoC">
+<table data-page-node-id="ABFCtsHBxNGcR48WPD7PFL">
+<thead data-page-node-id="gqDUhoW4JkC2zmSI0T3iwW"><tr data-page-node-id="8tqtgqEmpC3Ize4Qb5TnAx"><th style="width:44px" data-page-node-id="Pql3NYMsZWw0TAdclGoHPT">#</th><th data-page-node-id="6aQ78yBcqTa8nA9OC6V3go">结论</th><th style="width:96px" data-page-node-id="7zEwxZwJGHYmXYCPb2Zhb9">等级</th></tr></thead>
+<tbody data-page-node-id="1JWfWknRnwLWvdmeAAdwpb">
+<tr data-page-node-id="dOUGD1ToCQO45LpcvLrxoh"><td data-page-node-id="ktkfYn00LArSP5OruO0BMU">1</td><td data-page-node-id="NLFaOAf0o5bysMU8Xszh9M"><b data-page-node-id="tNSLRb5dBRDtmSdC2AnrMw">SQLite 派生库只保留 9.26% 的有效作答</b>，此前"完整度 4.85%"是抽取假象，不是数据本身问题</td><td data-page-node-id="kuGptgBG1VPRPVdsWDppFQ"><span class="tag t-red" data-page-node-id="29HxdB7ZLAEUzNkaYz2Z9i">高</span></td></tr>
+<tr data-page-node-id="uRBIzypRHqGT83ofvSZ75n"><td data-page-node-id="B0EGAUAFoCYE6DFJMryNlf">2</td><td data-page-node-id="1lrisZ1R4RW67mNPEdIX2I">真实数据每校有效作答 <b data-page-node-id="dosTXgImpiPv6IaqvDYoBj">22–55 题（中位 44）</b>；83 题问卷分年份改版，无学校答满 83 题</td><td data-page-node-id="hlo9RjalwdnpqStLqrJf1n"><span class="tag t-red" data-page-node-id="pnk9FftI9X0gX897XI9dLN">高</span></td></tr>
+<tr data-page-node-id="iCgzwoBiV9kUAGsZwoGQya"><td data-page-node-id="t3MO0BnKP7e6E3c3VL8otl">3</td><td data-page-node-id="5uiQoCMq89AfcXtDzldNHx">归一化量程取自<b data-page-node-id="rMiZ5t66C0U08Xmyp3bLjZ">实测极值</b>而非理论满分，<b data-page-node-id="keliO2pZJiGhPPBHdHrOwH">12 题量程 ≥ 1e6</b> 被脏值主导</td><td data-page-node-id="CQhavvQ4FIJlpLRUH2IRlG"><span class="tag t-red" data-page-node-id="cEBd6NzK75SOBTdQfE3ZJA">高</span></td></tr>
+<tr data-page-node-id="fsmDMjWUrvfGIdRZKsZuWA"><td data-page-node-id="SFoIIMbptpe6NVwqftNJna">4</td><td data-page-node-id="MQ86mC1yfKOfdsnPJebQOB"><b data-page-node-id="lB7Prm3umC019GxuWCm2eI">27 题（32.5%）归一化压缩超 100 倍</b>，相关维度得分实际趋近 0</td><td data-page-node-id="Pwm9dF5hQsj3cCfkXgCHNY"><span class="tag t-red" data-page-node-id="OBFSKAxRaiJh8EjsitiBiN">高</span></td></tr>
+<tr data-page-node-id="FEftGfUTYCEAwDmELRUXT2"><td data-page-node-id="75i5chGvM1zyUXGWJqTp7c">5</td><td data-page-node-id="KaUbHMy68QHX3gF0Uqh5r6">原始宽表 <code data-page-node-id="vQL0t5J34Udsuit3dCPLSa">question_59</code> 之后<b data-page-node-id="UpEUu6xTzTQWJejSUvfpuP">串列错位</b>，25 列混入其他题目答案</td><td data-page-node-id="PyyNfoPCS40XZ5A3j0GQxB"><span class="tag t-org" data-page-node-id="ZMqJHhzBmSXgf0SKAwAX1e">中</span></td></tr>
+<tr data-page-node-id="Yu6j4t2KNJe4ly3ttNyHGY"><td data-page-node-id="fxm6ug55CLrXBCy7vd6aB2">6</td><td data-page-node-id="cc9CF9HkLyKywVwczi1cAQ">全矩阵 <b data-page-node-id="Q1y2JBotrMkvYhGx6JYR4t">47.61% 为零值填充</b>，统计前必须剔除</td><td data-page-node-id="wmakYcrtuCdqgQXPWUHTl3"><span class="tag t-org" data-page-node-id="UxiPR1JDqJZcUzuyZCAXmS">中</span></td></tr>
+<tr data-page-node-id="Ir2EmRVLVSt3hd6TgdIOHs"><td data-page-node-id="rPwJIPJvQEG9F7jFWXRvJs">7</td><td data-page-node-id="DgmREOZ5SEt8uePi6Fslw1"><code data-page-node-id="Aq0vjQwHPWCUvIiEjXihQF">Q22</code> 的 min=max=1，归一化存在<b data-page-node-id="FlFjJUOk6MTSkUEO0o7pwD">除零风险</b></td><td data-page-node-id="Kj8SVbBvQgLgFrfrXoYK3U"><span class="tag t-org" data-page-node-id="WBKyaGV5ZfiU0xfAfIGrNr">中</span></td></tr>
+<tr data-page-node-id="FUGEU5BpRIr9jPAfFzxJKE"><td data-page-node-id="YxFyn2tEBC1mCzvxFYsUZH">8</td><td data-page-node-id="XAfd85nQPZ538tU4JDeKAt">email/phone 含 4,743 条 <code data-page-node-id="DEWfA7PbWxuBApzS3Nxy1g">NA</code> 占位、城市名误填为邮箱</td><td data-page-node-id="6ZEkCy0aD3Y4jFmKG16vUM"><span class="tag t-org" data-page-node-id="zJGql4tH1OyAh2hMTghELg">中</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 data-page-node-id="9xBak5oDQYIp9XyeAo23Wy">1. 数据规模</h2>
+<div class="grid g4" data-page-node-id="zWiNspjfGhb3TDr4o9kArw">
+<div class="kpi" data-page-node-id="Hk372P42ndlGAdGYRXY9BR"><div class="lbl" data-page-node-id="MNszgMuHWFInEIQCBh2XSn">文件合计</div><div class="val" data-page-node-id="w8bTtvGIvi9UTZjqgSm6CR">1,721<span style="font-size:14px;color:#6b7280" data-page-node-id="1XH6IuFjDHCJYddKb5kXCR"> MB</span></div><div class="note" data-page-node-id="EvNIg9FmEAmyeieNHqpYac">1.68 GB · mysqldump 8.0.43</div></div>
+<div class="kpi" data-page-node-id="dRxSF2tCyv4Rn92bjSm1Iz"><div class="lbl" data-page-node-id="gbqJDDosKKfrwDDsB25y9L">数据库 / 表</div><div class="val" data-page-node-id="tCY2tC5q1UiT2nw9OUP8CS">2 / 5</div><div class="note" data-page-node-id="c2L41f7qXz1ME48BuGQrTe">test_number + regional</div></div>
+<div class="kpi" data-page-node-id="3jsJpVevObBYD82vM1AT7W"><div class="lbl" data-page-node-id="qwOXk7Qn9EOTnD4AzUYfmG">总记录数</div><div class="val" data-page-node-id="aLSPiZarqqfrrIuMqBnbGT">31,865,561</div><div class="note" data-page-node-id="cXTLc9KoMQ9HeJII0vC6ks">全量解析，非抽样</div></div>
+<div class="kpi danger" data-page-node-id="jBYbIzBMRy49MoGtr9ibh1"><div class="lbl" data-page-node-id="Qrul8r0eohGemwYG2hLJ7T">零值填充占比</div><div class="val" data-page-node-id="K3UVsprRA55HQatoGITFLP">47.61%</div><div class="note" data-page-node-id="vlFwiPzG7Va6CrOnE4B7lK">14,814,406 行</div></div>
+</div>
+
+<div class="card" style="margin-top:14px" data-page-node-id="pDZVZrSRvGuLgP0rbxInJ3">
+<h3 style="margin-top:0" data-page-node-id="jadvlJVze6m0vBJlg0JQ4S">1.1 表清单</h3>
+<table data-page-node-id="jjDQ7tJoJ8QbuvqmPJ15R8">
+<thead data-page-node-id="rQrgaLOEeej2mFVtJi3UBJ"><tr data-page-node-id="FHgvuHvVn1b13IlVHFfcCU"><th data-page-node-id="xEyOj3RAZ5BF0GWrDXclKM">库</th><th data-page-node-id="AWytde0JGOeD4yL7fQVpgI">表</th><th class="n" data-page-node-id="hmaXE7onHBCHti5fora81h">记录数</th><th class="n" data-page-node-id="CyoaWYJFQEzH5V4ZFBBJA0">列数</th><th data-page-node-id="lr2I3IoH3TAELgPBIK5tQq">说明</th></tr></thead>
+<tbody data-page-node-id="ypPXh2g4jhhOqYXEapvtAQ">
+<tr data-page-node-id="gZS0tSC2EYU8q9I7B8haIt"><td rowspan="4" data-page-node-id="oCXxDFYgqsoNqNwTAd6FGJ"><span class="tag t-blu" data-page-node-id="XzcAunSvKMiSqNErRA4avl">test_number</span><br data-page-node-id="IvGP6n1HckqMZZEEI1anfg"><span style="font-size:11px;color:#6b7280" data-page-node-id="rADYpdUQHGIAqrBTwp2PYD">973.39 MB</span></td><td data-page-node-id="GlVDyLvdYi3TfKOsb2BFGG"><code data-page-node-id="ChewVg04NOVAl12xU2v3GM">school_answers</code></td><td class="n" data-page-node-id="m0wj3TQjaHOZuJCXFDES1E">31,115,621</td><td class="n" data-page-node-id="YucET9P6vOe4oN1LrRxlqb">5</td><td data-page-node-id="wXwMkohe0J0jzT8SDSZd4E">全矩阵 = 374,887 校 × 83 题</td></tr>
+<tr data-page-node-id="Ko1NBrF1ajFG6yAbqsVViI"><td data-page-node-id="gbtDx2pL7xEIoaChAKP4nL"><code data-page-node-id="O663MmrgYH6yWWPQAPBUCT">schools</code></td><td class="n" data-page-node-id="CQTgtOdy5LwfTSeVSZaQUr">374,887</td><td class="n" data-page-node-id="1Jxu405s9VamVC2Xbh6Ze9">14</td><td data-page-node-id="KWEA2hXw2qFyeKzzTSdVev">含 email/phone</td></tr>
+<tr data-page-node-id="YIeaoX1ouQ3liqGEoTK2BM"><td data-page-node-id="gvM3VgVdtTMYNEErrKiltU"><code data-page-node-id="botuBq48tOCp9C3BbypgY6">questions</code></td><td class="n" data-page-node-id="V7adKQK0wsVs0mcyCaTcmX">83</td><td class="n" data-page-node-id="eJarL0r5BplmuYrqobNEtj">9</td><td data-page-node-id="gtXB7hGHHNey5yqrwUfU4w">题目与维度字典</td></tr>
+<tr data-page-node-id="bU9aKkwhUqLUA3lC0om94m"><td data-page-node-id="TiwqbpeE1UgkegMYENF7w9"><code data-page-node-id="API14EPKSILObDIKXWYbTQ">question_min_max</code></td><td class="n" data-page-node-id="BYE4N6JfNWWu2bpbzmnQ12">83</td><td class="n" data-page-node-id="A7a2GBVe6B49SOUaWpfDzX">3</td><td data-page-node-id="uFGRWjkyHGBSgD7EvJtmAW">归一化量程（SQLite 中缺失）</td></tr>
+<tr data-page-node-id="jcT3LXelqxWHb2g8dstbOg"><td data-page-node-id="UAUMPI1uelCicYYG3xhhvR"><span class="tag t-gry" data-page-node-id="pe3wKZSxkS5FMgdcIa6skV">regional</span><br data-page-node-id="FWQ6bXqb2HnJp2YNI9A1m0"><span style="font-size:11px;color:#6b7280" data-page-node-id="j7RhFNGUiBuFPrblslgQpo">747.64 MB</span></td><td data-page-node-id="XgBd0HD2n8lOwCH3rhdmum"><code data-page-node-id="jKb7jGwBBQo77Vx6HqUCMu">school_data</code></td><td class="n" data-page-node-id="cNfcKjGgDSWqBnSiKdOGHF">374,887</td><td class="n" data-page-node-id="dk8zYRFfJtWWJuNyXjJsXS">97</td><td data-page-node-id="Mfy9Y1mQFiKYXBAJq7uTxH">原始答卷宽表（14 + 83 题）</td></tr>
+</tbody>
+</table>
+<div class="note" data-page-node-id="XcDnzwvLsMHxKNlFhBuTTi"><code data-page-node-id="QOxdD6k1H8vLUGvZ1Ce7Mx">school_answers</code> 有主键、唯一键 <code data-page-node-id="2yEa5DU8ZLgyxMKLPm8RZq">uniq_school_question(school_id,question_id)</code>、题目索引与两条外键 —— <b data-page-node-id="gx08QWrcoFK7OYGQpBeYVU">设计明显优于 SQLite 派生库</b>。</div>
+</div>
+
+<h2 data-page-node-id="4BeImRAbhoL6CmLPs6pvn5">2. 全矩阵结构</h2>
+<div class="card" data-page-node-id="NY5xoCPADDygLDL1xETVCp">
+<h3 style="margin-top:0" data-page-node-id="xlo6joIwhj0l2GNQh7FvEw">2.1 填充构成</h3>
+<div class="split" data-page-node-id="npeCBhQnaZ2mYqLF2Z0JON">
+<div class="bigbar" data-page-node-id="d5pwrbfbHKT5QFZV8h7CWP">
+<div style="width:52.39%;background:#16a34a" data-page-node-id="ZNCo7OBClsjLS8PQ5y9OYl">有效作答 16,301,215（52.39%）</div>
+<div style="width:47.61%;background:#dc2626" data-page-node-id="pALudNpBUcDvQT2StZSmPq">零值填充 14,814,406（47.61%）</div>
+</div>
+</div>
+<div class="critbox" data-page-node-id="b7C2lYCRNCFSOGeUdWzCGH">矩阵以 <code data-page-node-id="C1npmIFDvHjCAO603DeW4d">0</code> 填充未作答项，<b data-page-node-id="A9AJ7Mt4TuPx0Lr2UHLHkK">不区分"未采集"与"真实答案为 0"</b> —— 这是后续所有统计的最大陷阱。NULL 与负值均为 0 条。</div>
+
+<h3 data-page-node-id="Jfdlr3FWzdzHUG97H0rRI2">2.2 每校有效作答题数</h3>
+<div class="grid g4" data-page-node-id="cuH211NowHpac5I9bGHG2f">
+<div class="kpi" data-page-node-id="B9ZRBz7PkYgDfMDQeAyEe3"><div class="lbl" data-page-node-id="ndsVssEVzjCU95CYfgEhIJ">最小</div><div class="val" data-page-node-id="waeYjbcvKyTlmGDgduxjRJ">22</div><div class="note" data-page-node-id="TAh3FASDvAaMNu3gBRY53v">题</div></div>
+<div class="kpi" data-page-node-id="aRrOU7DAiWZTnZaONbuF44"><div class="lbl" data-page-node-id="sAqXSCbxHUQAbPGAwLc5Qf">中位</div><div class="val" data-page-node-id="emH6AnPMhgoM3fBSnstShK">44</div><div class="note" data-page-node-id="L87dvjkRFr7Ap6udw6LEeQ">P25=41 · P75=46</div></div>
+<div class="kpi" data-page-node-id="okAZNTjzPd2NC5p5vEcqXo"><div class="lbl" data-page-node-id="BS1deW7Rd7ooRm8rw9rL5A">均值</div><div class="val" data-page-node-id="ASxF2BEwZOoIOr3mEQo2ne">43.48</div><div class="note" data-page-node-id="fBGdqkvSRMR8QoNzc0uU6i">P95=51 · P99=54</div></div>
+<div class="kpi warn" data-page-node-id="pvZ6bXvOpLeoGRdobWaoKG"><div class="lbl" data-page-node-id="1FoPN2g2AJkDlc8q7vAkzr">最大</div><div class="val" data-page-node-id="0rt3oszIuF8Wm8ZE6kvevj">55</div><div class="note" data-page-node-id="JlR0e1hqUECChDnCwjRiuE">无一校答满 83 题</div></div>
+</div>
+<table style="margin-top:12px" data-page-node-id="lmmrfgQv4ilhABPPtzkZ5u">
+<thead data-page-node-id="E3FItZm9lN6UtrZQbXEpn1"><tr data-page-node-id="KAK3aCRnA5xGCoJ5SLzgTq"><th data-page-node-id="h82ZwdaMQxNCMhZNMe1EjH">题数区间</th><th class="n" data-page-node-id="FrlrHmKDYN6WUHx4EFiuRV">学校数</th><th class="n" data-page-node-id="xL7r1f7LEfKP8rGdD5H4Bz">占比</th><th style="width:200px" data-page-node-id="zEEfclbgoQRdnQUsnYmjkE">分布</th></tr></thead>
+<tbody data-page-node-id="n0sz6ZqP1s1sPCGNDJnLun">
+<tr data-page-node-id="dJDETgQfedZJukT6LYG3HR"><td data-page-node-id="1h5z9wak3DVyAzu7ZtYyov">20–29 题</td><td class="n" data-page-node-id="wkoF5ck6zmW1Xn2Uv0UoIu">4,025</td><td class="n" data-page-node-id="cWm6UJcyH9iFMuFcSTqXzI">1.07%</td><td data-page-node-id="vuHm1RQp61UKIWjL1sirZ7"><div class="bar" data-page-node-id="suIgm6mTQMRPjyPuUV7xqJ"><i style="width:1.4%" data-page-node-id="uWSaZvI4YRMdmYhbARTg6O"></i></div></td></tr>
+<tr data-page-node-id="cKX2TUEjh6FU4FFATd3kbZ"><td data-page-node-id="vQlQPojO8NhCRwIl0kuwy2">30–39 题</td><td class="n" data-page-node-id="4Xsl8Evj3a2obP2XoF7628">56,432</td><td class="n" data-page-node-id="mR9zgqYyMnc7oW8LQRVI8L">15.05%</td><td data-page-node-id="6OMCl5FqoRJ6gZREA6n3JO"><div class="bar" data-page-node-id="pMBqttdDkdiswrENqXK8F7"><i style="width:19.9%" data-page-node-id="3FKjVcgf1VuBHy9AtaYfXy"></i></div></td></tr>
+<tr data-page-node-id="VeAdxK9ByS7vS4laIYSe21"><td data-page-node-id="2oZSk0i63N2pNaJUw7BeTr"><b data-page-node-id="cHytwtt52hi7VpCHjAmJep">40–49 题</b></td><td class="n" data-page-node-id="9n1A7LqRZMm2MyjWPDQ7MY">283,633</td><td class="n" data-page-node-id="5Cryy0Op6EXmqUWtb287ha"><b data-page-node-id="kKXqZ3PrKjr6s578cVcnrS">75.66%</b></td><td data-page-node-id="TTyi6ZtHbP4LVN445iZmsA"><div class="bar g" data-page-node-id="JGv1RohM1vLEKbuIaw70Sd"><i style="width:100%" data-page-node-id="sWKENgt2m8KvlJDd7lG828"></i></div></td></tr>
+<tr data-page-node-id="kI6FZm1W997Ej1LTOrlcgm"><td data-page-node-id="RX3tO1HghljXf6jGKHTG8L">50–59 题</td><td class="n" data-page-node-id="cTDyO4t9werlkvlGxk3Pkw">30,797</td><td class="n" data-page-node-id="vr21AxP6w38oTKwBgGEfBK">8.22%</td><td data-page-node-id="zYFjmoL4jFSrPdnEG5bnRu"><div class="bar" data-page-node-id="JI4J3H19G6vNj6RMqtqAIJ"><i style="width:10.9%" data-page-node-id="EYVwno7gBOPcAzDtZyZrdS"></i></div></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card" data-page-node-id="N5c3H9kzkBxOwRg6H6lI9R">
+<h3 style="margin-top:0" data-page-node-id="Aarhg7oq9v2vJiH9ChGKGZ">2.3 与 SQLite 派生库的决定性对比</h3>
+<table data-page-node-id="4d6Eab8kmQW5WfKkd94RKc">
+<thead data-page-node-id="vVc9Rf8MaoNuEIxlZOy07Q"><tr data-page-node-id="VY4FAu39WEZjwAGv1EMFhK"><th data-page-node-id="6h84UeWJ6RAIFfF6wyVaRX">对比项</th><th class="n" data-page-node-id="XMNTaMnsJI8oyzAADDN7oB">SQLite 派生库</th><th class="n" data-page-node-id="2EE0LovuGU5WD0ZhUp9pYf">MySQL 完整库</th><th class="n" data-page-node-id="HWLKyW191Derp5kGsbNgxe">差异</th></tr></thead>
+<tbody data-page-node-id="2KTahdcfprWg2AYaILAPAO">
+<tr data-page-node-id="uDF2pr05Ae71K2XIeSORjB"><td data-page-node-id="1p2lIukxVsKgfcAWLzw29C">作答记录数</td><td class="n" data-page-node-id="qdjNPu0FxwR2UapkYKYYqF">1,509,896</td><td class="n" data-page-node-id="qsnBn3FFIZouaCfjU2K4nE">31,115,621</td><td class="n" data-page-node-id="wIly0GXFcHfBUWtzLvmgUW">20.6×</td></tr>
+<tr data-page-node-id="8m8haTYu3Mmu4pW7VtDAX4"><td data-page-node-id="SZgE5PdoZ4PzRw4h9RCvcU">其中有效（非零）</td><td class="n" data-page-node-id="BIqbkc4Q1mBSfajYvarJfZ">1,250,143</td><td class="n" data-page-node-id="07G1lkmHbM6fDyvakGtJdP"><b data-page-node-id="JZQOwT34W1MjGYImFH4bT4">16,301,215</b></td><td class="n" data-page-node-id="hfxo25bFrJdFlbGd6nG5b1">13.0×</td></tr>
+<tr data-page-node-id="VjZGAKtCdTX1wcjuE3hFM9"><td data-page-node-id="TLBEIW9iYxytahcF2U6TZp">每校中位题数</td><td class="n" data-page-node-id="wN3urMy4lxWxi3BmH3WULH">4</td><td class="n" data-page-node-id="i9ZlvDgaXsPdiVODj0trwf"><b data-page-node-id="XJLyMI6aeUpMaZvps1l0SI">44</b></td><td class="n" data-page-node-id="RIVZza8FxDbSEzF1umAyX0">11×</td></tr>
+<tr data-page-node-id="kX8PnKe5ELS2jH1SVWVWwp"><td data-page-node-id="G2NLKYiJ2V3HUfDoVw28JJ">Q6–Q83 覆盖</td><td class="n" data-page-node-id="FT18fi0UskVtgxruOakXvQ">仅 10 校</td><td class="n" data-page-node-id="pypsSf7Uc1O3UXI2OP1HH1">4.8% ~ 100%</td><td class="n" data-page-node-id="UJ1enwIfeZgTrHvqoqVCG9">天壤之别</td></tr>
+</tbody>
+</table>
+<div class="critbox" data-page-node-id="xV6DDEkdC9iux3nvCHSOlI"><b data-page-node-id="Y9myB8Fg4E43nEJ3tO1hwh">SQLite 仅保留了 9.26% 的有效作答。</b>此前报告中"83 题模型仅对 10 所学校完整可用""完整度仅 4.85%"的结论，<b data-page-node-id="oo20IChyHnzK7N4CH8SIb1">测量的是 SQLite 抽取管线，而非原始数据本身</b>。真实数据覆盖远比此前判断的健康。</div>
+</div>
+
+<h2 data-page-node-id="wzBc5xrFvmGJfDO9TxDnSW">3. 年份 × 题目采集矩阵</h2>
+<div class="card" data-page-node-id="apuKZWe6tGnwtbdHtzBWA1">
+<div class="note" style="margin:0 0 12px" data-page-node-id="xXXlywOF5qsm9y8tDaRKyl">问卷在 2020–2023 间<b data-page-node-id="SPNKapOTjgEkFhhZiUkhrU">逐年改版</b>，83 题按采集年份分为 9 组</div>
+<table data-page-node-id="YmoaF9HmOJizH4K63Vf9NC">
+<thead data-page-node-id="wS733MEsD47DXcUqIguSov"><tr data-page-node-id="g5dZIHvIDD4iAQMrZlGozz"><th data-page-node-id="E5jASLiUODWK3E6ZIV22Bg">采集年份</th><th class="n" data-page-node-id="ftYueVN4DLfEZ8ChjYByfJ">题数</th><th style="width:150px" data-page-node-id="lOYLrHOmE09OkNmUCZ4Zju">占比</th><th data-page-node-id="E3ZKlw7HcZ2k5iAQZ1Mowj">典型题目</th></tr></thead>
+<tbody data-page-node-id="Zal7AyVitwWyqoeXhBAHhv">
+<tr data-page-node-id="ICQVVlePxrhr3dRkauG4z4"><td data-page-node-id="RVTwPSLGt0eI82ybcriGko"><b data-page-node-id="2khPCH2qqCBvCNzRR6Voip">全年份（2020–2023）</b></td><td class="n" data-page-node-id="2WxaysmH9KE5WjOqL3dyTj"><b data-page-node-id="SE452srbSe8kBHc6C5OPpd">22</b></td><td data-page-node-id="5PiASfCRoURW8OuarteYXD"><div class="bar g" data-page-node-id="kZiRYNHE6UkJAWUplATcEr"><i style="width:100%" data-page-node-id="ZaUphrxwOgrREmOUddKHuk"></i></div></td><td data-page-node-id="NBMEBF6irpTfdwkdJEs5sV">Q2、Q4、Q10、Q13、Q19–Q22、Q28–Q31、Q33–Q36</td></tr>
+<tr data-page-node-id="qlNTM7AFZgsLWvGPeWN8P0"><td data-page-node-id="FUhF16iTRGPaRiUIdZ0wY8">仅 2023</td><td class="n" data-page-node-id="g6lHPXx0adp2inl4ZHzb1a">21</td><td data-page-node-id="kjcDKwZPOZ6MpGKwgRCyqs"><div class="bar p" data-page-node-id="svWjW33GyORsrfFEkpS6g0"><i style="width:95%" data-page-node-id="qYdigXmXbY4Q0QhwG8Mw95"></i></div></td><td data-page-node-id="MXwQ36AYbQO1qivvy8DBkB">Q59–Q63、Q67–Q83</td></tr>
+<tr data-page-node-id="ADQZ3TOJAkwbh8cSWxLR7x"><td data-page-node-id="m3PeapAYEkovNmSWAoMEGt">2020+2021+2022</td><td class="n" data-page-node-id="Pu19sqAsh7OoBAsgVCIzgv">11</td><td data-page-node-id="sAOxJmNcuUzCDr9XiIrMoj"><div class="bar" data-page-node-id="GpXAONQ0WzWKVvoDa3y2ba"><i style="width:50%" data-page-node-id="cmFQDEwOFwsieNklHgIeFh"></i></div></td><td data-page-node-id="D8AAEhgCXWKMQne1ICJIip">Q1、Q6、Q7、Q12、Q16、Q24、Q27、Q41–Q43</td></tr>
+<tr data-page-node-id="crTFGDNGVsFIjvtxuKvs7D"><td data-page-node-id="DGTtWdfoECuuGhjk5EOn3a">2020+2021</td><td class="n" data-page-node-id="dig694qcddTCYBDWyNLYpO">11</td><td data-page-node-id="gQ8WRuiC8czQusUqgyeDBf"><div class="bar" data-page-node-id="8SqxvAFUkduJVAjB3x9m1A"><i style="width:50%" data-page-node-id="rA3EjoxPxit5mfLyHm5tWo"></i></div></td><td data-page-node-id="aMptW3BLFBGj6MlLPZsPJo">Q3、Q5、Q8、Q11、Q14、Q15、Q17、Q23、Q25、Q26、Q45</td></tr>
+<tr data-page-node-id="XwNUK5AVLqO5VcJ9PSh8zL"><td data-page-node-id="C4YBmmK4NfJfHcGjkWEZo3">2022+2023</td><td class="n" data-page-node-id="ACZY4B8JHWH1PLdbw1bLC9">6</td><td data-page-node-id="dVu0CivfSVC3yEfXwPCUpc"><div class="bar" data-page-node-id="ZTQ8357wIboF17oGsHZYB2"><i style="width:27%" data-page-node-id="4wcReZBYBEJLS0t7hDZf8v"></i></div></td><td data-page-node-id="DxplqldoJECG9oqZE9fdUc">Q49、Q51–Q54、Q58</td></tr>
+<tr data-page-node-id="vUhHaBWDndYxDVWW4BYeDd"><td data-page-node-id="cYHznBtEf61uMUs8BqDK4J">仅 2022</td><td class="n" data-page-node-id="mdvcVqy07Lzjewk7rtMhGL">4</td><td data-page-node-id="Y7qge9MOGyJyWJE4RVHy9W"><div class="bar o" data-page-node-id="F78L1q8E036NZnRmlJ6dL7"><i style="width:18%" data-page-node-id="oe5nXXJw7WMhcwfb1xt38B"></i></div></td><td data-page-node-id="LwyTdCP89gJw5qIyqa3m04">Q50、Q55、Q56、Q57</td></tr>
+<tr data-page-node-id="K7gt1zf82MqUPEM8hj3xDS"><td data-page-node-id="Fdl9Mpn8WKBsSBcYeRgZkp">仅 2021</td><td class="n" data-page-node-id="uvXlc8gMQRXMABO6teckHV">3</td><td data-page-node-id="9ej7VBuxYqRbOP68XAWM2y"><div class="bar o" data-page-node-id="J5QUCCcw7aNtAtoxgqXzyH"><i style="width:14%" data-page-node-id="KrpuJfAcG2iGiD4V4qr7bn"></i></div></td><td data-page-node-id="DkzpxRnx1CO4grC1JNa4pf">Q46、Q47、Q48</td></tr>
+<tr data-page-node-id="YZwlFrEzXT8fdHMTokShEu"><td data-page-node-id="iPH4tjtTqgx9cepunlxGJm">2020+2021+2023</td><td class="n" data-page-node-id="afveN4VKxDva6OvsOZT66X">1</td><td data-page-node-id="PCVIWRFOCZGNJyWzlDLEHs"><div class="bar o" data-page-node-id="6GAdE9JvnI7Y87tXtfY4ds"><i style="width:5%" data-page-node-id="ZW2mdx63StDTc9ISygtum7"></i></div></td><td data-page-node-id="qrBnAXbdrNlw32sbf4nxU1">Q9</td></tr>
+<tr data-page-node-id="RfYEqNu5wILMQAlfMgEefE"><td data-page-node-id="cKqZhshP0viEcYc74R3ucP"><span class="tag t-red" data-page-node-id="De29UwSsRtIWE0RvMoauNO">覆盖率 &lt; 50%</span></td><td class="n" data-page-node-id="xelEhKB8sLDLHjbwo2tZqJ">4</td><td data-page-node-id="b88bCQHoW2ARlpSfKOU48L"><div class="bar r" data-page-node-id="istH5G2eokaKDLWJeWQxbz"><i style="width:18%" data-page-node-id="6osDvgtTNVTq0eb8pAWRWu"></i></div></td><td data-page-node-id="CASHLkd7a3cgpdqHU8b5Rj">Q64(49%)、Q65(20%)、Q66(25%)、Q70(21%)</td></tr>
+</tbody>
+</table>
+<div class="warnbox" data-page-node-id="z7gdWtTnh9DExF3T5rqq8o">全年份可比的题目<b data-page-node-id="J18xJT5cvN9pVnwdCMFW0y">只有 22 题</b>，跨年趋势分析必须限定在这 22 题内。2023 年问卷变化最大（新增 21 题，同时 Q1/Q6/Q7/Q12 等 11 题停止采集）。</div>
+</div>
+
+<h2 data-page-node-id="HlwDGWApc9VlFjxwyvQk63">4. 归一化体系（核心问题区）</h2>
+<div class="card" data-page-node-id="O6e00bkoeM4PC5wYJE0MiA">
+<h3 style="margin-top:0" data-page-node-id="IBdD8QF0oHxE4M0YfBgLEs">4.1 公式验证</h3>
+<div class="code" data-page-node-id="SLPAF0EnLBBi0Pim6SLAQm">normalized_value = (value - min_val) / (max_val - min_val)</div>
+<div class="note" data-page-node-id="qWpxyhtsN9RIlQFNTSugYk">200,000 条抽样验证，匹配率 <b data-page-node-id="NrXnfmOtRPSVqXIHmjc9N2">99.90%</b>（199,807 / 200,000）。未匹配 193 条为精度差异（如 <code data-page-node-id="8CJqatosgxCLDUxzDcquDZ">0.429</code> vs <code data-page-node-id="V2FcDYm7HbqCZL48RDK9Ju">0.42857142857142855</code>），属分批计算不一致。</div>
+
+<h3 data-page-node-id="lzPPPHNo3Sbwq0NTnGCsmq">4.2 量程来源：实测极值，而非理论满分 🔴</h3>
+<div class="critbox" data-page-node-id="CYBCD7TdCQ6gW0l59jM4yL"><b data-page-node-id="cEU1S4dzN7X97jJbbmjXZD">83 题的实测最大值与 <code data-page-node-id="O8DXedqfPBruK0tqABNuai">question_min_max.max_val</code> 逐一完全相等</b>，无一例外 —— 证明量程是从实际数据里 <code data-page-node-id="5bRBLHvYBxirlkPtgzt7KB">MAX(value)</code> 算出来的，不是题目理论满分。<br data-page-node-id="SI4u7jXlFD9AJNeEEYZHRZ">后果：<b data-page-node-id="8hsbS23svQgDGzLQDDW9ZF">任意一条脏数据都会永久毁掉该题的归一化</b>。</div>
+
+<h3 data-page-node-id="6HrEsk3JBnu4tmjtwbzGnf">4.3 被脏值主导的 12 题（量程 ≥ 1e6）</h3>
+<table data-page-node-id="YZ3tqpoT69PU3qVL8OdpXD">
+<thead data-page-node-id="cV296svFUnrkuBEzEC1D74"><tr data-page-node-id="PhiXpZdL9j3A0a2waDZILX"><th data-page-node-id="iVI7G6yBo0EhH52W7xdpZ3">题</th><th data-page-node-id="2688HNv4TNSlmrSbilemXv">题干</th><th class="n" data-page-node-id="79ZSpgHLJZzJ9tpnc25ns0">官方 max</th><th class="n" data-page-node-id="WIaJYy7FXXjbrMzqTofefX">非零均值</th><th class="n" data-page-node-id="pXRy9suuo5wOsWnmu0WoxN">均值/max</th></tr></thead>
+<tbody data-page-node-id="rEj2IisVhmlXN2m5alEoEk">
+<tr data-page-node-id="cQurCXAyyg3y7D7yBojAtL"><td data-page-node-id="QUdXajaxoC8zPtdVmDUN5B">Q29</td><td data-page-node-id="d9fje9n26STDsnC61ZzBfL">校级领导信息化培训总计人次</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="fnqH1xAF10koLajofoNgpc">100,000,000,000,000</td><td class="n" data-page-node-id="B1WP9mkyxG3gLcKH6VKKnj">299,961,399</td><td class="n" data-page-node-id="bP3N9bWSIzRCiFLZq7QwWs">0.000003</td></tr>
+<tr data-page-node-id="EvA0KX8FtceaYsN7BBMf57"><td data-page-node-id="fKhlwTSOKv0XtkDQsssnag">Q38</td><td data-page-node-id="cB809mq0sBVgcdXVGFk2lG">信息技术课程教师人数</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="d2cVlwX6J7KFB2gR1jAX4E">78,956,735,973</td><td class="n" data-page-node-id="wcHMp7woASalhKJeAifIHj">486,988</td><td class="n" data-page-node-id="tSpKPMVCbep3bOLIefX7hf">0.000006</td></tr>
+<tr data-page-node-id="sHAGBqJ8KEDSKFbIw0X3yj"><td data-page-node-id="mUQcwwb1SEQ5Bw1rIkngFh">Q40</td><td data-page-node-id="G6UR2A1FNdMppZ5DajQBCK">参加信息化专项培训教师比例</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="dL40tHi91Mde2zNgmPyKpj">15,909,211,197</td><td class="n" data-page-node-id="K8Ffrbc80FcqBHIjyiEGPu">49,757</td><td class="n" data-page-node-id="hnL0gF03Ub6WPleC7Dzxih">0.000003</td></tr>
+<tr data-page-node-id="32zsSvpcSl1yZj39TgJ2X7"><td data-page-node-id="qXE23KRwPwnCV61lE4r22z">Q47</td><td data-page-node-id="TrfAPe1AqwSWtUXtJgoxtH">听课教室开课课时数</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="dLrOeZX6BkhDNhQmKrV5x2">15,891,588,662</td><td class="n" data-page-node-id="3XRcBUdF7qld4H0QMzLq4z">273,234</td><td class="n" data-page-node-id="LYM74bI2DKxkhTvaGktvcr">0.000017</td></tr>
+<tr data-page-node-id="hLsNG15mAUUKYaBw7in0pQ"><td data-page-node-id="gECpx2mmZEhmxEavA6ul1f">Q41</td><td data-page-node-id="zkZtaE8qEBhihiiaHB34aF">信息化校本培训次数</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="s3BBCFobCLTYHgGXF89HOR">99,999,999,999</td><td class="n" data-page-node-id="J9pROx25UXnSgZVwi324bF">510,247</td><td class="n" data-page-node-id="i5WlXDMT1n615Nim24J5ic">0.000005</td></tr>
+<tr data-page-node-id="bYIrpCD72r1HozfYZijvCN"><td data-page-node-id="8OZesgj6TFdfuNIJaMshGC">Q44</td><td data-page-node-id="OVbHGMH5UFkueKrMSmjTzX">参加教育信息技术比赛数</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="fTJ0CqSUl872dNAD2yvmLA">99,999,999,998</td><td class="n" data-page-node-id="kIu5pfON8hWExCNaTtAmME">1,244,462</td><td class="n" data-page-node-id="4zBiYyzGA0OwA5F4tBPbFB">0.000012</td></tr>
+<tr data-page-node-id="tKd5luq6VheeDI4nwzmLtW"><td data-page-node-id="nJzvKDd4bt0Dhmuun9ZOon">Q45</td><td data-page-node-id="dF6vzrqbzwWgwrj5Jn5KWB">教育云平台晒课数量</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="BrSxdV893mI6A6FqG9q1lH">99,999,999,998</td><td class="n" data-page-node-id="4w29O5R0M97ZtOL83T7dEV">2,458,961</td><td class="n" data-page-node-id="esYRxZWACuIvXHjdcXb32i">0.000025</td></tr>
+<tr data-page-node-id="LruGvWqYE7737yWKEbbgM0"><td data-page-node-id="4Zq1a1SztzZgSR5pqiKG8F">Q43</td><td data-page-node-id="us6wMHj0P51gHoXAXUaiHt">校本培训覆盖教师比例</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="ZkHzItWD2YBZfZmEYQhbk1">5,455,454</td><td class="n" data-page-node-id="VmVJuIWhwhkr5AWzqrFKSi">91.94</td><td class="n" data-page-node-id="8SDCdmVXsW0R5JF5XizVcf">0.000017</td></tr>
+<tr data-page-node-id="wltvtDAItUXVystLc0RR18"><td data-page-node-id="BDlnaPZciuPp1xEccMj97i">Q18</td><td data-page-node-id="XOG0dw0eEjvCfPObTZ6yVr">智能学习空间共计</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="hJKL7OygqY2rOuob1zjekK">9,999,999,999</td><td class="n" data-page-node-id="7VmFSAszS43HklgRv1vNc3">237,517</td><td class="n" data-page-node-id="s2BRccFHiSjO7MvKFE1BZ3">0.000024</td></tr>
+<tr data-page-node-id="k59ZSqnldIwK7ApsJk8Hpv"><td data-page-node-id="wP7P0m832lhmiGvoPPR806">Q42</td><td data-page-node-id="3v7pLMwGjp01mL3XmAGvkp">分学科信息化校本培训次数</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="IFykjPDvcLbHZW0YIA0k6q">9,999,999,999</td><td class="n" data-page-node-id="LDyWa7UUzHQUD24JnYOuFH">272,799</td><td class="n" data-page-node-id="07FYIXwUiVnqi5NC3dhafk">0.000027</td></tr>
+<tr data-page-node-id="5Y45dyOlvIHM56wzqkhFZk"><td data-page-node-id="1ZYyeFO8j0Pv6AoQL3Ud4j">Q39</td><td data-page-node-id="7KcCifK1CfdHB75B8HtwOr">兼任信息技术课程教师人数</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="YZl3ZCQMM1FsHpZQca9nje">999,999,999</td><td class="n" data-page-node-id="uJca26FaGR2dZBFrzxjAjG">3,626</td><td class="n" data-page-node-id="dbPbJRUqFGiwtV84b9j3yj">0.000004</td></tr>
+<tr data-page-node-id="0ANFBjD7yoz0KYkYUCRq2x"><td data-page-node-id="Ap4yVIT65vmPhDHWay7m1I">Q60</td><td data-page-node-id="yzHsz7SjQe3IpPQNzi5iqd">网络出口总带宽（Mbps）</td><td class="n" style="color:#dc2626;font-weight:600" data-page-node-id="JCbV1KUTYnRTjDQbktut5y">1,048,576</td><td class="n" data-page-node-id="yo3bHfAGhlOl2NwnDBoHh7">1,884.89</td><td class="n" data-page-node-id="bF0XvG2WWVWXEdY4F95TaG">0.001798</td></tr>
+</tbody>
+</table>
+<div class="critbox" data-page-node-id="BX8JsBvhObzq1OLV9xEwe3">典型脏值：<code data-page-node-id="iDQtycwczFqNTFpQQpUXAD">999999999</code>、<code data-page-node-id="NdIuHSZSeXbznLAThzM2od">99999999999</code>、<code data-page-node-id="jImpg33ObbvaVIMQNESElS">12345678</code>、<code data-page-node-id="jDllfFrKtVRZs7JvyP097w">123456789</code>、<code data-page-node-id="eMJVOBztxG6gjbOGoghkuC">1048576</code>（= 2²⁰）、<code data-page-node-id="laiqYCPkpvurLvBCCxuVA4">100000000000000</code>（100 万亿人次培训）。<br data-page-node-id="dMcmJxsPeJj7DGVDdnwZCK"><b data-page-node-id="fQFHBiWQrhCmWkmAZqQETz">Q40「教师比例」量程达 159 亿、Q43「覆盖教师比例」量程达 545 万</b>，而比例类指标理论上限为 100。</div>
+
+<h3 data-page-node-id="r7RBl6RNi5uYb5TOYqrieE">4.4 压缩超 100 倍的 27 题（占 32.5%）</h3>
+<div class="warnbox" data-page-node-id="uPBUBA5MGCsnOA0e3HkmDC">除上表 12 题外，还有 15 题均值/max &lt; 0.01：<code data-page-node-id="QcF6LwFNeF4bA7XsvRGYiR">Q31(90000)</code>、<code data-page-node-id="KOmRYuvANii6V09NAIzbOg">Q32(226666)</code>、<code data-page-node-id="VHTFM5X7zUgP9J2m21Yzcn">Q33(224333)</code>、<code data-page-node-id="feXMRIIBpgNIm3jrpTiqgs">Q35(22222)</code>、<code data-page-node-id="a7G7dWwvilEkUgjDG6p2vw">Q36(10000)</code>、<code data-page-node-id="mz2lNPoJwUTH5RAIGL6itA">Q37(20000)</code>、<code data-page-node-id="7CxpYbGeV9CWlAsea7yCoL">Q46(10000)</code>、<code data-page-node-id="Gtn7JW2d5gq0PYNHkrHnRY">Q50(10000)</code>、<code data-page-node-id="VF1uwuCzwnCDRL2poSbTwI">Q58(100000)</code>、<code data-page-node-id="ysbzYjD3Ju3LTADlaoyZph">Q65(5000)</code>、<code data-page-node-id="oeFHxSS5Wr9VzHUgEvOHMl">Q68(5000)</code>、<code data-page-node-id="YjLHHIAfWb8vqFS9a2TcIG">Q69(5000)</code>、<code data-page-node-id="aoNgZZhwoQzcpSCAijJGYf">Q70(5000)</code>、<code data-page-node-id="Py5WeZREnDYvEV99BqMOgG">Q80(20000)</code>、<code data-page-node-id="0mH3HUmEwMAbyGyp9chzus">Q81(20000)</code>。<br data-page-node-id="fQR9yuFDxSe8Cs0dfMHBfJ">其中 Q31–Q37 是<b data-page-node-id="5E3rHZl6wHOfi2yrAmOlpi">经费占比</b>类，理论上限 100，实测量程却达 90000 / 226666 / 224333。<br data-page-node-id="oFW33swtdB6vS2vRIaxJAp">按维度看受损最重：<b data-page-node-id="SEWrtFa5v43SagsbCNJcgM">保障机制</b>（16 题，max 合计 1.0×10¹⁴）、<b data-page-node-id="moDkOkLjsQqPXu0QOTcCJ6">数字素养</b>（9 题，max 合计 2.26×10¹¹）。</div>
+
+<h3 data-page-node-id="GIbb0BoxBXivijGTwj0GHM">4.5 其他量程异常</h3>
+<table data-page-node-id="y9xd0OTkA3BC5b3dJ2o9pZ">
+<thead data-page-node-id="1bbCvcxbAEqm4GbvPbGBOz"><tr data-page-node-id="rpbx62EJhNuIsTFN4mmTsD"><th data-page-node-id="yys97KcabUSjhgWXNh9WhU">问题</th><th data-page-node-id="5sTgSwXxW8sA5eLaUUCRFP">题目</th><th data-page-node-id="ceNAmXHTajvRmBEnHTNtTr">说明</th></tr></thead>
+<tbody data-page-node-id="ziZj4pNHpPC7OC1z4GVlPA">
+<tr data-page-node-id="VNVzcA3ErB7sUfATLJMHL1"><td data-page-node-id="zTxsGoaPQ47DsdgS7wtdYQ"><span class="tag t-red" data-page-node-id="Y6hAfHbtnSaxUA7CLxJaWg">除零风险</span></td><td data-page-node-id="zN2HLH3yA94rJft1pXjVqr"><b data-page-node-id="GOyzYwewqgUc1ozSGAaDy4">Q22</b></td><td data-page-node-id="3AZ23BdmggJt7fEJRfTaeS">min=1, max=1 → (v−1)/(1−1) = 0/0</td></tr>
+<tr data-page-node-id="NY6PEJxszp9vOV86HzDGZ1"><td data-page-node-id="uNARi8IrfQGDsUY984q4o8"><span class="tag t-org" data-page-node-id="OyPZhs7a3T5BARbuDzDWQ7">min≠0</span></td><td data-page-node-id="32dXJ2L54BECsmSoDfQszW">Q10, Q13, Q19, Q21, Q22, Q28</td><td data-page-node-id="IbXsvzy6e3DruVg0Bl81Yb">"有多少"类计数题，最小值却为 1，说明从无学校填 0</td></tr>
+<tr data-page-node-id="2soccVdBe2B6tJEX6G4PuO"><td data-page-node-id="b6lnwo9QT4qjTd45sESUZo"><span class="tag t-org" data-page-node-id="3Ur4RwdgztUc02kflgU819">比例题超量程</span></td><td data-page-node-id="PvTkhfEvTEqq7cMtuHt1Ey">Q4(1009)、Q34(1006)</td><td data-page-node-id="y1EGvUWYIyOKf6YQCURXA9">教师比例 / 经费占比，理论上限 100</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 data-page-node-id="rUPpeQEUGxmnDofGA0FFUM">5. 原始宽表（regional.school_data）</h2>
+<div class="card" data-page-node-id="RULoC0dxtLXZcgaQpwWdyF">
+<h3 style="margin-top:0" data-page-node-id="JPKW7iVABReK9EvVtxhlmA">5.1 原始答案形态</h3>
+<div class="code" data-page-node-id="stkAqRujfeaw6YZATUTT5g">question_1 : [\B.语文\, \C.数学\, \D.英语\, \E.科学\, \F.美术\, \G.音乐\, \H.体育\, \I...]
+question_3 : [\B.网络备课\, \C.网络教学\, \D.网络教研\, \G.教学资源制作\, \H.教学资源管理\]
+question_4 : 100
+question_31: 15.25</div>
+<div class="note" data-page-node-id="C8SxcsZvazlQ1873tpuBxe">原始答案是<b data-page-node-id="0noUrGhECrHziO6ISYvaq2">多选题选项列表</b>，数值化规则 = <b data-page-node-id="QvQuEBvEQDC3nQ0VkXBjPR">选项个数</b>。这解释了 Q1 量程为何是 21（共 21 个学科选项）、Q3 是 11、Q7 是 13。</div>
+
+<h3 data-page-node-id="NLdsJzH2r6GJOGq9g3H3n8">5.2 串列错位 🔴</h3>
+<div class="critbox" data-page-node-id="dhLAwQcus41MRn7wdKE7MN">从 <code data-page-node-id="DzMKepBpixNVPiCGCVFBRz">question_59</code> 起，<b data-page-node-id="nf9htaleQbpqPMN9brC3QN">25 列内容出现明显串位</b>，单列内混入了多个题目的答案：<br data-page-node-id="TaXuX3jNU1it35esgDdPQ2">
+<code data-page-node-id="X22JrDP7SdU1eq7g6JpDSi">question_59 : \D.名校网络课堂\],[\E.观摩式\],[\B.教师教学应用分析\],[\D.地市级平台\],[\Yes\]</code><br data-page-node-id="p2E6PMDKQqF7Q1XFOkFtYY">
+<code data-page-node-id="X8FCg668s7x2uAEGYnvFgA">question_60 : \F.餐卡\],B.否.1,[\C.教学楼\</code><br data-page-node-id="jIVZghqgYJvjGg5MhmEByY">
+<code data-page-node-id="Eh0Eia78c4p7ZBIiewDQ5r">question_62 : \F.生活区\],[\C.省级培训\],1,[\D.制定学校教师...\],30,10,10,20,1</code><br data-page-node-id="KNVGj96AqjnCiPM0jTEyfR">
+这 25 列（Q59–Q83）中，Q71–Q83 在规范化库里覆盖率为 100%，但<b data-page-node-id="yxNznzcm4406f9nOeNE7rP">其原始来源已错位</b>，取值可信度需重新核验。</div>
+
+<h3 data-page-node-id="W5DAaI8Ybwy7lijeD929rx">5.3 基础列填充率</h3>
+<div class="grid g2" data-page-node-id="ZdPhLQ8aFl6mIkGjUiERnF">
+<div data-page-node-id="BZ2eoEQCisU4maqPTXz8d3">
+<table data-page-node-id="kCEZpUHL9ZCzM17WOFLVrI">
+<thead data-page-node-id="l3rV2k2CM53XwirUM59bVf"><tr data-page-node-id="FvWy27SxKAaqQIlGxhD79v"><th data-page-node-id="5GuNSYQrJ8QruI3N6fio9x">字段</th><th class="n" data-page-node-id="piD16pj5SSwpwuoc9gSKkE">填充率</th></tr></thead>
+<tbody data-page-node-id="8BjSTjER7lCSqNcdgXNdC7">
+<tr data-page-node-id="Am630wgjaqgDkgduYnL5ut"><td data-page-node-id="uRgUnbsEGpJhxJRK6340QD">id / province / school_name / year / school_type</td><td class="n" data-page-node-id="O2SJc2kzijktXnlyl9Yy7P">100%</td></tr>
+<tr data-page-node-id="iQYIkgbnd0R5bZQyR77czq"><td data-page-node-id="4kdmNn9gIHEfRyPUOkZaQ7">city / district</td><td class="n" data-page-node-id="OYaC9OymRiNkF7mFXchhIz">99.99% / 99.96%</td></tr>
+<tr data-page-node-id="7I3LX1rbvgwytjEErfpqGN"><td data-page-node-id="OgGdPGiA8HFSnR2dDGBBkw"><b data-page-node-id="xST9Enhewo6dLAFXQfeiZl">email / phone</b></td><td class="n" data-page-node-id="6FQEsHX9Q9Ljf8Ns9WXLY6">75.96%</td></tr>
+<tr data-page-node-id="En75iTj5TSKA9WJA4WXnLt"><td data-page-node-id="q0fxQM6RNzhtl2wrJyMffA"><b data-page-node-id="cgo39wzG8Y5A8CyCe3LzzA">class_num / teacher_num / student_num</b></td><td class="n" data-page-node-id="kBbN6O03q2RAW2UkX3DBeh">44.18%</td></tr>
+<tr data-page-node-id="EZTKz5AVpqUtgFYJRVnPSz"><td data-page-node-id="KBgnkoZALtf6lD8IKf67jC">data_mark</td><td class="n" data-page-node-id="RDxZgkeL39EzmuVnZFBlgt">100%</td></tr>
+</tbody>
+</table>
+</div>
+<div data-page-node-id="YfrqRvuHLkD9NSZOZkSXth">
+<table data-page-node-id="t0b3OkF6SX05u0SQW0SdNM">
+<thead data-page-node-id="wjmHPlDrKBKg771Ugp6f5z"><tr data-page-node-id="lqGBppHXXLzFKhFqi2dpEH"><th data-page-node-id="ocSBz3M5FwH17ibFcwwcAS">指标</th><th class="n" data-page-node-id="EM0FaA7T6KlJtQqvLkDCkC">email</th><th class="n" data-page-node-id="2MC82fOBKvnr57see7jFeZ">phone</th></tr></thead>
+<tbody data-page-node-id="WaIMqwhsCy0MDmA6U1jErY">
+<tr data-page-node-id="JctOSIVmGYR1rL9ZOZozKB"><td data-page-node-id="4jpBwQkdmrHaNuJB3tmyq5">填充率</td><td class="n" data-page-node-id="eN08SQJ7A2VbWN2LdP5mLE">75.96%</td><td class="n" data-page-node-id="inANGpzChuzHf1Do9CuPI4">75.96%</td></tr>
+<tr data-page-node-id="c4VkEh9TR4FsGlc1uHmEb8"><td data-page-node-id="XbgumPwvkw7hDhR7l9MnSB">格式合法率（占非空）</td><td class="n" data-page-node-id="oJcNzwoS6Pn97XQYHTRukW">89.61%</td><td class="n" data-page-node-id="3h1VgHENX3oKjcuwsZF9DG">86.96%</td></tr>
+<tr data-page-node-id="v4BiLngvNWUwWOg9oigzZw"><td data-page-node-id="B7a5y49njrKNzXT6a74tkG">重复组数</td><td class="n" data-page-node-id="UfowNTNiEsv47dycM2GtZf">30,619</td><td class="n" data-page-node-id="LcBiX3Q7UAI5iYCkWVqVHZ">31,962</td></tr>
+<tr data-page-node-id="gO0LHoGFaiTgrJiAXZEwbs"><td data-page-node-id="QAMWJrJ62eFZ29rOMzZjVe">NA 占位符</td><td class="n" data-page-node-id="qXBxRmX6mOTQLOYiuDhGvW">4,743</td><td class="n" data-page-node-id="Q4cKmRghOaIrCXhCi3lqrQ">4,743</td></tr>
+</tbody>
+</table>
+<div class="warnbox" style="margin-bottom:0" data-page-node-id="io4je7VbMOYuq1d9uG2hCD">城市名被当作 email/phone：<code data-page-node-id="TFC1keFDDsziwkwHBVaAwG">西安市</code>(595)、<code data-page-node-id="EUmCPkLgQl5VIYHK6Yjm1o">咸阳市</code>(545)、<code data-page-node-id="Izw7jWAVM0wnVPOgeBE5hr">宝鸡市</code>(377)、<code data-page-node-id="Z1xdfsXC2YmeuCnVZp6EXK">渭南市</code>(321)。<b data-page-node-id="bdyjYLYo1UByfxSgDf8ymN">10,877 个 email 关联多个不同校名</b>。</div>
+</div>
+</div>
+</div>
+
+<h2 data-page-node-id="jPEcwf0q3goM1dHFDDxrru">6. 表间关联</h2>
+<div class="card" data-page-node-id="1BrLIq5KBhjEQkkXxRXVNw">
+<div class="tree" data-page-node-id="GlKNR4P3m5r6sJanpwyAhC">questions (83) ──1:N──► school_answers ◄──1:N── schools (374,887)
+                              │ question_id
+                              ▼
+                     question_min_max (83)</div>
+<table style="margin-top:14px" data-page-node-id="PtMgGHeUxKYTH5RkqpYs9q">
+<thead data-page-node-id="bRB3ZDSTRYZ7QYKybkKS9X"><tr data-page-node-id="0qQFE4h0Z2e9ES4jROU0NG"><th data-page-node-id="bDRybOMdpDgCcyuTnIHVKF">关系</th><th data-page-node-id="uyj814fXXwrzn5HQqdWAmS">基数</th><th data-page-node-id="W70CYrgDH23pWZDNeDfukZ">约束</th></tr></thead>
+<tbody data-page-node-id="3YL4nF9b6IHrOfGbiHOxgu">
+<tr data-page-node-id="GkxpTSsBUZhbdNQTN5kEC2"><td data-page-node-id="r9cpo2GusRaIQKWCDiuZ2S"><code data-page-node-id="sJp7ATyFA5ID151bPAVWI6">school_answers.school_id</code> → <code data-page-node-id="w3X71p4WzfIHFs5VmhpO7Y">schools.id</code></td><td data-page-node-id="a1rO9SSi6HtVW8sbt6SppS">N:1</td><td data-page-node-id="EAIoGEiT4L4RIoEPI8zKhY"><span class="tag t-grn" data-page-node-id="VgRaoNencib9PgwRBhcX0U">FK, CASCADE</span></td></tr>
+<tr data-page-node-id="AxoAJU6DorSLAPmMssDO6s"><td data-page-node-id="EJtvbaewqhZd74FN0P6CIV"><code data-page-node-id="dGHhKGJ5ivAjvDaV16jFRe">school_answers.question_id</code> → <code data-page-node-id="EhnTXF5XetSrvHUEhqslRb">questions.id</code></td><td data-page-node-id="fpPVWRC8X24boek7ChOe9a">N:1</td><td data-page-node-id="a4Zezem9bcfgbB9UNfWkHL"><span class="tag t-grn" data-page-node-id="HVsvlRjzEr7BZWQeaXWZHL">FK, CASCADE</span></td></tr>
+<tr data-page-node-id="J9Go9tkctoqEPrLPigU9FE"><td data-page-node-id="cEXyJqVxIUnt8C290xvGBx"><code data-page-node-id="9RthL5ZEjNv041vfkMua0m">question_min_max.question_id</code> → <code data-page-node-id="FSG7ot8a8udOSNut6oaYtv">questions.id</code></td><td data-page-node-id="pi9KqKMep4OAMu64Bb1gS6">1:1</td><td data-page-node-id="G3NzWZaHofRnObiHAVtUx4"><span class="tag t-red" data-page-node-id="DhlYrFkRsVQLdrAKFzGDVU">无任何约束</span></td></tr>
+<tr data-page-node-id="SNpH6PcPvIIiKPlOlgBf8n"><td data-page-node-id="UkPdDzVHolhao0axHTTWHD"><code data-page-node-id="fFrVQZYQmoDuwOn14Ee0Pl">questions.level1/2_name</code></td><td data-page-node-id="r3CFxwaRB72JDLsfoXEuK9">6 → 13 → 83</td><td data-page-node-id="ZvZ34MaZZy3yVpr4jd5dj5"><span class="tag t-org" data-page-node-id="Z6ia9yHFExFk7iIt2FYquW">无维度表</span></td></tr>
+</tbody>
+</table>
+<div class="note" data-page-node-id="X1KtOHvKoglOGcTK2z3Mur">三级权重（level1/2/3_weight）<b data-page-node-id="4RyqbJUrC6MjYS5ae3dTMi">全部恒为 1.0</b> → 当前是等权算术平均，权重体系未启用。</div>
+</div>
+
+<h2 data-page-node-id="goH2r0uyKk8G4wCkGLpWeu">7. 问题清单与建议</h2>
+<div class="card" data-page-node-id="BLh4UV6RY7KVQrMWLAZAgz">
+<table data-page-node-id="Iq4myZePVA4dUyHWFRLEuI">
+<thead data-page-node-id="duPfucdDnurGlu7UyWLbrh"><tr data-page-node-id="L7E56yG9GZmz0MiurgrYxR"><th style="width:64px" data-page-node-id="flmRnwyuwsjQmSKAuCEkvj">优先级</th><th data-page-node-id="rKPE7U6U0UMfDPFuCAIBb5">问题</th><th data-page-node-id="feohn4kNKmVIweYFkbNiAQ">建议</th></tr></thead>
+<tbody data-page-node-id="2QFu2tBBZSj8zxAFmBGuzi">
+<tr data-page-node-id="csjbIGT1USKcCMB8pOr4uQ"><td data-page-node-id="x2WKnSYqXrUrcPCxYJcGtC"><span class="tag t-red" data-page-node-id="Cb7eI2liFcmU8M8J8cTED2">P0</span></td><td data-page-node-id="b6SLBG4oyJVL1UCxyjGMjD">归一化量程取自实测极值，12 题被脏值主导</td><td data-page-node-id="TIaCaEG2BqEJ8RBEHCrZSu">改用<b data-page-node-id="3qnK0OiqAM0vnU36AnYzVm">理论满分</b>口径（比例类=100，计数类=选项数）；或 P99 截尾后再算量程</td></tr>
+<tr data-page-node-id="vhzFPwcs4Csqo3TuQiIAcK"><td data-page-node-id="fnYTFWanRGwDSJgBf7qMIp"><span class="tag t-red" data-page-node-id="kiFcDm4IrTtRfytFSddaXQ">P0</span></td><td data-page-node-id="NUiEFhhxao8AvDWkcu2vQJ">27 题压缩超 100 倍，维度得分失真</td><td data-page-node-id="XEZ5X6TRRCMhXqnOVrivPG">重算 <code data-page-node-id="LHEnlK58YEYLpFrJoWtCOu">normalized_value</code>，复核"保障机制/数字素养"历史得分</td></tr>
+<tr data-page-node-id="mKZyOCYKrXNvCdseRu0FsZ"><td data-page-node-id="5QeGy2na2pyAHx278KcIC6"><span class="tag t-red" data-page-node-id="fTgWV1cgdNzhye5IRUl74z">P0</span></td><td data-page-node-id="Li0KQ0W5jFWDTFcGLq8Cnn">SQLite 派生库丢失 90.7% 有效作答</td><td data-page-node-id="MDoiFu5EnYryB4BtOKfDlK">排查 <code data-page-node-id="OHnIatDwdHEjG37pmOBnJD">import_real_data.py</code> 过滤逻辑，改为从完整库抽取</td></tr>
+<tr data-page-node-id="n34wjuhpf1DxQK5ZqSIU7W"><td data-page-node-id="PYtKqiQQCMPxwzSaeC7Yl6"><span class="tag t-org" data-page-node-id="SyEkVE3GzIhinD6Benj4hZ">P1</span></td><td data-page-node-id="pw6NW9lWFpwi5mo8bYvjbN">Q22 min=max=1，除零</td><td data-page-node-id="d6OJb4khC2AqyyKznFCx3y">加 <code data-page-node-id="uEtcNN58Qwmn24gE6knKuV">max&gt;min</code> 校验；Q22 为是否题，量程应为 0–1</td></tr>
+<tr data-page-node-id="Sm4ZZnhWMt3KksnlKLZzOW"><td data-page-node-id="VzFH62HK2jnVCQf2eyVdzE"><span class="tag t-org" data-page-node-id="3QLSQWsnyKweSomEVTyIED">P1</span></td><td data-page-node-id="HscoM3iWrNBZ0eOsLCsNE0">全矩阵 47.61% 零值填充</td><td data-page-node-id="YL1eF31GIOJ6F572k8OaiX">未作答存 <code data-page-node-id="RTWBRDlCDADfecE9iDENVc">NULL</code>，或用 <code data-page-node-id="rD2f8EMR0Z03V2zxFN86DY">is_answered</code> 标记位区分</td></tr>
+<tr data-page-node-id="GfECEBwPCD2xvLPuDs1jHB"><td data-page-node-id="xvFNzqM4JZFGCkSkKsCygA"><span class="tag t-org" data-page-node-id="NCgtuyvMdiBsu8mzGZhyFj">P1</span></td><td data-page-node-id="XLxE3nuJrAcJPNzmTRubm7">宽表 Q59–Q83 串列错位</td><td data-page-node-id="gU39jcUU2to5afAZW7FHK9">重新导出该区间，核对列边界与转义</td></tr>
+<tr data-page-node-id="goLVgoPYnmCSu8J5rQoWOz"><td data-page-node-id="lmXtOBcNJiEQTl16elB1eW"><span class="tag t-org" data-page-node-id="060ziErJSuBNa7cCSd630y">P1</span></td><td data-page-node-id="ebsjIKWgEqGo9vwMsgpohd">6 题 min=1（计数题）</td><td data-page-node-id="bteKK8h2tk5D0g56xlr7KU">与业务确认最小值口径</td></tr>
+<tr data-page-node-id="K0E7pYsV5tX2qJvag7yCcC"><td data-page-node-id="kV3WeK8hDGc7w85HFuNS1l"><span class="tag t-blu" data-page-node-id="oHVKNxSAEuwqSgu5B5Rjyq">P2</span></td><td data-page-node-id="ykinZB3POFSR0aYFAAmHHg"><code data-page-node-id="RBZY65Kvicj0wamQEiXDcG">question_min_max</code> 无主外键</td><td data-page-node-id="CHuwfU0BmA5ccpSlhHyjYe">加 <code data-page-node-id="ocRFvt5fkEfVVX0Bbrkvrz">PRIMARY KEY(question_id)</code> + FK</td></tr>
+<tr data-page-node-id="VeGAOSqB7RMTrnmK8WUhVY"><td data-page-node-id="WzQwYTDaEpnFC3dsz9GmTG"><span class="tag t-blu" data-page-node-id="HPDgjuNtacorZlzBotv7FC">P2</span></td><td data-page-node-id="v9frMFG0mUTchvJGdH5NPD">email/phone 含 NA、城市名</td><td data-page-node-id="LGVexlsPvjylJ8ZZM8ccCu">入库前做格式校验与占位符识别</td></tr>
+<tr data-page-node-id="FRdaP8Pp31W7zSmwdCV7jl"><td data-page-node-id="4qdZ4RsW2dx2FyfLkOp2p5"><span class="tag t-blu" data-page-node-id="qhE4B0GMgfZ7AHEVNkw9P0">P2</span></td><td data-page-node-id="PJ9af2kzQ4NKn7cIHCg2EN">仅 22 题全年份可比</td><td data-page-node-id="BcZGiYKmAsF4G7DzyC8ITO">建立"题目-年份"元数据表，分析时自动限定</td></tr>
+<tr data-page-node-id="grSTwnmgCIeAa0XDOUJTie"><td data-page-node-id="GAKLCsjvMb5QDOz06TjDyE"><span class="tag t-gry" data-page-node-id="rXM3xoPKDKHqccSHr8FIAe">P3</span></td><td data-page-node-id="VB87fFMD1HenYdcKgFFd7z">归一化精度不一致</td><td data-page-node-id="h9vl9zgYr3jTH38DVhvgCS">统一 double 存储，避免分批写入差异</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card" data-page-node-id="zKjOpR69ecHuXAzeFjDsim">
+<h3 style="margin-top:0" data-page-node-id="TtJVLgTZotM5VN7FXBHQRf">7.1 分析使用建议</h3>
+<ol style="font-size:13.5px;margin:0;padding-left:20px" data-page-node-id="Rxryxe0RdAlliKXnHnnVVD">
+<li data-page-node-id="kM6NwwontRVAVG1oMM0ltX"><b data-page-node-id="F4teGNiBjs7EDBfVFsHTn4">统计前必须剔除零值填充</b>：<code data-page-node-id="d6BFAQHME2SZPVbIyJUk9Z">WHERE value &gt; 0</code>，否则所有均值被拉低约一半。</li>
+<li data-page-node-id="NkV8jfeOQo9FN6FhHP2yYr"><b data-page-node-id="4cfKuTgppkGCQwLOByGRuM">跨年趋势只用 22 道全年份题</b>；2023 年数据不可与 2020 年直接全题对比。</li>
+<li data-page-node-id="oBs6xYuKy9zSlAXCDE2iIr"><b data-page-node-id="REXo89I9wAN9V5YnusP8SH">暂不使用 Q4、Q18、Q29、Q31–Q47、Q58、Q60、Q80、Q81 的 normalized_value</b>，除非先修复量程。</li>
+<li data-page-node-id="7rYDvG5WXCfJdAySKCkScY"><b data-page-node-id="DTSPvOd9zhPBJgxfg0a6vk">Q64–Q66、Q70（终端配备数量）覆盖率 &lt; 50%，不建议纳入评估</b>。</li>
+<li data-page-node-id="cXWdWr1bw968wm3TKtOt4H">如需可信综合评分，建议<b data-page-node-id="tLWkaPgSRgccO9PwEkLXIZ">基于 <code data-page-node-id="KmYd0fvHwY37HLGHGoOFBL">value</code> 重新归一化</b>，而非复用库内 <code data-page-node-id="n6Sz7ubFMEDpv6FlyJuFkF">normalized_value</code>。</li>
+</ol>
+</div>
+
+<footer data-page-node-id="CkAuG8TMOLJ8re1GMuDvJL">口径：全矩阵 31,115,621 = 374,887 × 83，由逐行解析确认（非估算）· 有效作答 = <code data-page-node-id="iWE0kDLtO0pSUIeCXfLGFx">value &gt; 0</code> · 年份归属经 SQLite <code data-page-node-id="Hgh6HM5VNyvbqZ9iHuCXx2">schools.year</code> 完整映射 · 归一化公式经 200,000 条抽样反向验证（99.90%）· 生成于 2026-09-08</footer>
+</div>
+</body>
+</html>
