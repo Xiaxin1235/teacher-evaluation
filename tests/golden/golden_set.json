@@ -1,0 +1,216 @@
+{
+  "golden_version": "0.1",
+  "description": "回归评测基准（Golden Set）。每次改 M07/M08 或评估模板后重跑，防事实不回退。",
+  "cases": [
+    {
+      "id": "G001",
+      "tag": "综合评估",
+      "speed": "fast",
+      "question": "T001 2023-2024,2024-2025 教学水平怎么样？",
+      "expect": {
+        "total_range": [75, 95],
+        "redline_case": false,
+        "must_mention": [],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G002",
+      "tag": "综合评估-低覆盖率",
+      "speed": "fast",
+      "question": "T003 2023-2024,2024-2025 教学水平怎么样？",
+      "expect": {
+        "total_range": [60, 80],
+        "redline_case": true,
+        "must_mention": ["红线"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G003",
+      "tag": "单维聚焦-评教",
+      "speed": "fast",
+      "question": "T001 2024-2025 学生评教怎么样？",
+      "expect": {
+        "redline_case": false,
+        "must_mention": ["评教"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G004",
+      "tag": "单维聚焦-教案",
+      "speed": "fast",
+      "question": "T004 2023-2024 教案覆盖度？",
+      "expect": {
+        "redline_case": false,
+        "must_mention": ["教案"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G005",
+      "tag": "趋势对比",
+      "speed": "fast",
+      "question": "T001 2023-2024 和 2024-2025 有什么变化？",
+      "expect": {
+        "redline_case": false,
+        "must_mention": ["趋势", "变化"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G006",
+      "tag": "边界-无该教师",
+      "speed": "fast",
+      "question": "T999 2024-2025 教学水平？",
+      "expect": {
+        "clarify_or_na": true,
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G007",
+      "tag": "边界-缺对象",
+      "speed": "fast",
+      "question": "近三年教学水平怎么样？",
+      "expect": {
+        "clarify_true": true,
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G008",
+      "tag": "边界-无年份",
+      "speed": "fast",
+      "question": "T002 教学水平怎么样？",
+      "expect": {
+        "clarify_or_na": true,
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G009",
+      "tag": "红线-查实触发",
+      "speed": "fast",
+      "question": "T003 2024-2025 有没有师德问题？",
+      "expect": {
+        "redline_case": true,
+        "must_mention": ["红线", "不参与评分"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G010",
+      "tag": "红线-未查实不触发",
+      "speed": "fast",
+      "question": "T002 2024-2025 有没有师德问题？",
+      "expect": {
+        "redline_case": false,
+        "must_mention": ["未触发"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G011",
+      "tag": "综合评估-全校视角",
+      "speed": "fast",
+      "question": "看下 T004 近两年整体情况",
+      "expect": {
+        "total_range": [70, 98],
+        "redline_case": false,
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G012",
+      "tag": "单维-课堂听课",
+      "speed": "fast",
+      "question": "T002 2024-2025 课堂教学（听课）情况？",
+      "expect": {
+        "must_mention": ["课堂"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G013",
+      "tag": "单维-教研成果",
+      "speed": "fast",
+      "question": "T001 2024-2025 教研成果如何？",
+      "expect": {
+        "must_mention": ["教研"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G014",
+      "tag": "多对象批提示",
+      "speed": "fast",
+      "question": "T001 T002 2024-2025 谁更好？",
+      "expect": {
+        "clarify_or_na": true,
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G015",
+      "tag": "含糊措辞-最弱",
+      "speed": "fast",
+      "question": "T004 2024-2025 哪方面最弱？",
+      "expect": {
+        "must_mention": ["最弱"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G016",
+      "tag": "红线-查实",
+      "speed": "fast",
+      "question": "T003 2024-2025 有没有被查实的投诉？",
+      "expect": {
+        "redline_case": true,
+        "must_mention": ["查实"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G017",
+      "tag": "数据缺口-无听课",
+      "speed": "fast",
+      "question": "T005 2024-2025 课堂教学情况？",
+      "expect": {
+        "clarify_or_na": true,
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G018",
+      "tag": "综合-低置信",
+      "speed": "fast",
+      "question": "T003 2024-2025 教学效果如何？",
+      "expect": {
+        "must_mention": ["无数据", "无支撑"],
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G019",
+      "tag": "集成-模型联调",
+      "speed": "integration",
+      "question": "T001 2024-2025 请用模型复核一遍教学水平结论",
+      "expect": {
+        "no_hallucinate": true
+      }
+    },
+    {
+      "id": "G020",
+      "tag": "集成-交叉验证",
+      "speed": "integration",
+      "question": "T003 2024-2025 红线结论请交叉验证",
+      "expect": {
+        "redline_case": true,
+        "no_hallucinate": true
+      }
+    }
+  ]
+}
